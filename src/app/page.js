@@ -1,7 +1,7 @@
-'use client'
+'use client';
 
-import { Box, Button, Stack, TextField } from '@mui/material'
-import { useState, useRef, useEffect } from 'react'
+import { Box, Button, Stack, TextField } from '@mui/material';
+import { useState, useRef, useEffect } from'react';
 
 export default function Home() {
   const [messages, setMessages] = useState([
@@ -9,29 +9,25 @@ export default function Home() {
       role: 'assistant',
       content: "Hello! I'm your health assistant. How can I assist you today? ",
     },
-  ])
-  const [message, setMessage] = useState('')
-  const [isLoading, setIsLoading] = useState(false)
+  ]);
+  const [message, setMessage] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
-  const messagesEndRef = useRef(null)
+  const messagesEndRef = useRef(null);
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }
+    messagesEndRef.current?.scrollIntoView({ behavior:'smooth' });
+  };
 
   useEffect(() => {
-    scrollToBottom()
-  }, [messages])
+    scrollToBottom();
+  }, [messages]);
 
   const sendMessage = async () => {
-    if (!message.trim() || isLoading) return
-    setIsLoading(true)
-    setMessage('')
-    setMessages((messages) => [
-      ...messages,
-      { role: 'user', content: message },
-      { role: 'assistant', content: 'Let me check the best options for you...' },
-    ])
+    if (!message.trim() || isLoading) return;
+    setIsLoading(true);
+    setMessage('');
+    setMessages((messages) => [...messages, { role: 'user', content: message }]);
 
     try {
       const response = await fetch('/api/chat', {
@@ -39,40 +35,37 @@ export default function Home() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify([...messages, { role: 'user', content: message }]),
-      })
+        body: JSON.stringify({ messages: [...messages, { role: 'user', content: message }] }),
+      });
 
       if (!response.ok) {
-        throw new Error('Network response was not ok')
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
 
-      const data = await response.json()
-      const assistantMessage = data.choices[0].message.content
+      const data = await response.json();
+      const assistantMessage = data.choices[0].message.content;
 
-      setMessages((messages) => [
-        ...messages.slice(0, messages.length - 1),
-        { role: 'assistant', content: assistantMessage },
-      ])
+      setMessages((messages) => [...messages, { role: 'assistant', content: assistantMessage }]);
     } catch (error) {
-      console.error('Error:', error)
+      console.error('Error:', error);
       setMessages((messages) => [
-        ...messages,
+       ...messages,
         {
           role: 'assistant',
           content: "I'm sorry, but I encountered an error. Please try again later.",
         },
-      ])
+      ]);
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   const handleKeyPress = (event) => {
-    if (event.key === 'Enter' && !event.shiftKey) {
-      event.preventDefault()
-      sendMessage()
+    if (event.key === 'Enter' &&!event.shiftKey) {
+      event.preventDefault();
+      sendMessage();
     }
-  }
+  };
 
   return (
     <Box
@@ -102,17 +95,11 @@ export default function Home() {
             <Box
               key={index}
               display="flex"
-              justifyContent={
-                message.role === 'assistant' ? 'flex-start' : 'flex-end'
-              }
+              justifyContent={message.role === 'assistant'? 'flex-start' : 'flex-end'}
             >
               <Box
-                bgcolor={
-                  message.role === 'assistant'
-                    ? '#d0f0c0' // Light green for assistant messages
-                    : '#b0e57c' // Slightly different light green for user messages
-                }
-                color="black" // Ensure text color is visible
+                bgcolor={message.role === 'assistant'? '#d0f0c0' : '#b0e57c'}
+                color="black"
                 borderRadius={16}
                 p={3}
               >
@@ -131,15 +118,15 @@ export default function Home() {
             onKeyPress={handleKeyPress}
             disabled={isLoading}
             sx={{
-              backgroundColor: '#f0f0f0', // Light gray background color
-              borderRadius: '8px', // Optional: rounded corners
-              '& .MuiInputBase-root': {
-                backgroundColor: 'inherit', // Ensures the input field matches the background
+              backgroundColor: '#f0f0f0',
+              borderRadius: '8px',
+              '&.MuiInputBase-root': {
+                backgroundColor: 'inherit',
               },
-              '& .Mui-disabled': {
-                backgroundColor: '#e0e0e0', // Slightly darker gray for disabled state
+              '&.Mui-disabled': {
+                backgroundColor: '#e0e0e0',
               },
-              height: '56px', // Set height to match the button's height
+              height: '56px',
             }}
           />
           <Button
@@ -147,22 +134,22 @@ export default function Home() {
             onClick={sendMessage}
             disabled={isLoading}
             sx={{
-              backgroundColor: '#232323', // Dark gray background color
-              color: 'white', // White text color for contrast
-              border: '1px solid #ccc', // Light gray border
-              height: '56px', // Match height with the TextField
+              backgroundColor: '#232323',
+              color: 'white',
+              border: '1px solid #ccc',
+              height: '56px',
               '&:hover': {
-                backgroundColor: '#1f1f1f', // Slightly lighter dark gray on hover
+                backgroundColor: '#1f1f1f',
               },
               '&:active': {
-                backgroundColor: '#000000', // Black background when clicked
+                backgroundColor: '#000000',
               },
             }}
           >
-            {isLoading ? 'Sending...' : 'Send'}
+            {isLoading? 'Sending...' : 'Send'}
           </Button>
         </Stack>
       </Stack>
     </Box>
-  )
+  );
 }

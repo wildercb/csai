@@ -1,14 +1,22 @@
-// src/app/api/chat/route.js
-
 import { OpenAI } from 'openai';
 
 const openai = new OpenAI({
-  apiKey: process.env.NEXT_PUBLIC_OPENAI_API_KEY,
+  apiKey: process.env.OPENAI_API_KEY,
 });
 
 export async function POST(req) {
-  const { messages } = await req.json();
-  
+  const requestBody = await req.json();
+  const messages = requestBody.messages;
+
+  if (!messages || messages.length === 0) {
+    return new Response(JSON.stringify({ error: 'Missing required parameter: messages' }), {
+      status: 400,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+  }
+
   try {
     const response = await openai.chat.completions.create({
       model: 'gpt-4o-mini',
@@ -23,14 +31,11 @@ export async function POST(req) {
     });
   } catch (error) {
     console.error('Error:', error);
-    return new Response(
-      JSON.stringify({ error: 'Internal Server Error' }),
-      {
-        status: 500,
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      }
-    );
+    return new Response(JSON.stringify({ error: 'Internal Server Error' }), {
+      status: 500,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
   }
 }
