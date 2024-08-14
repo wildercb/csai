@@ -10,6 +10,7 @@
     "upload-to-pinecone": "node -r dotenv/config scripts/uploadToPinecone.js"
   },
   "dependencies": {
+    "firebase": "^9.0.0",
     "@emotion/react": "^11.11.1",
     "@emotion/styled": "^11.11.0",
     "@mui/icons-material": "^5.16.7",
@@ -24,7 +25,6 @@
     "openai": "^4.55.4",
     "react": "18.2.0",
     "react-dom": "18.2.0",
-    "firebase": "^9.0.0"
   },
   "devDependencies": {
     "eslint": "8.47.0",
