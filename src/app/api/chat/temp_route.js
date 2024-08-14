@@ -1,7 +1,7 @@
 import { OpenAI } from 'openai';
 import { OpenAIEmbeddings } from "langchain/embeddings/openai";
 import { PineconeClient } from "@pinecone-database/pinecone";
-import { Pinecone } from '@pinecone-database/pinecone';
+
 
 const USE_OPENROUTER = process.env.USE_OPENROUTER === 'true';
 
@@ -15,32 +15,47 @@ const PINECONE_ENVIRONMENT = process.env.PINECONE_ENVIRONMENT;
 const PINECONE_INDEX_NAME = process.env.PINECONE_INDEX_NAME;
 const PINECONE_IDX_URL = process.env.PINECONE_IDX_URL;
 
-let pinecone = null;
+async function testNetworkConnection() {
+  // Helper function to verify network connection to Pinecone by checking env variables are properly set. 
+  const url = PINECONE_IDX_URL;
 
-async function initPinecone() {
-
-  const pc = new Pinecone({ apiKey: PINECONE_API_KEY });
-  const index = pc.index(PINECONE_INDEX_NAME);
-
-  console.log("index?")
-  return index;
+  try {
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'Api-Key': PINECONE_API_KEY,
+      },
+    });
+    console.log('Pinecone API response:', response.status, response.statusText);
+    return response.ok;
+  } catch (error) {
+    console.error('Error reaching Pinecone API:', error.message);
+    return false;
+  }
 }
 
-async function queryPinecone(query) {  
+const pinecone = new PineconeClient();
+
+async function queryPinecone(query) {
+  console.log("Querying Pinecone...");
+  
   try {
-    const index = await initPinecone();
-    
-    console.log("Creating embeddings...");
-    const embeddings = new OpenAIEmbeddings({
-      openAIApiKey: USE_OPENROUTER ? process.env.OPENROUTER_API_KEY : process.env.OPENAI_API_KEY,
+    await pinecone.init({
+      environment: PINECONE_ENVIRONMENT,
+      apiKey: PINECONE_API_KEY,
     });
+
+    const index = pinecone.Index(PINECONE_INDEX_NAME);
+    
+    const embeddings = new OpenAIEmbeddings();
     const queryEmbedding = await embeddings.embedQuery(query);
 
-    console.log("Querying Pinecone index...");
     const queryResponse = await index.query({
-      vector: queryEmbedding,
-      topK: 3,
-      includeMetadata: true,
+      queryRequest: {
+        vector: queryEmbedding,
+        topK: 3,
+        includeMetadata: true,
+      }
     });
 
     console.log("Pinecone query response:", JSON.stringify(queryResponse, null, 2));
@@ -69,11 +84,10 @@ export async function POST(req) {
   }
 
   try {
-    
     const userMessage = messages[messages.length - 1].content;
     const relevantDocs = await queryPinecone(userMessage);
     
-    console.log("Relevant documents:", relevantDocs);
+    console.log(relevantDocs);
     
     const systemMessage = {
       role: "system",

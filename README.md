@@ -60,7 +60,8 @@ graph TD
 2. **Firebase Authentication**: Manages user authentication and session handling.
 3. **Firestore Database**: Stores user data, conversations, and messages.
 4. **Cloud Functions**: Processes user messages and interacts with the OpenAI API.
-5. **OpenLLM API**: Generates intelligent responses based on the conversation context.
+5. **OpenRouter and OpenAI API**: Generates intelligent responses based on the conversation context.
+6. **Pinecone vector store and RAG**: Generates intelligent responses based on the conversation context.
 
 ## 3. Detailed Component Breakdown
 
@@ -121,9 +122,15 @@ This function:
 2. Sends the context and new message to OpenAI API
 3. Stores the AI response in Firestore
 
-### 3.5 OpenAI API Integration
+### 3.5 OpenAI API/OpenRouter API Integration
 
-We use Open Router's GPT-3.5-turbo model , more to come soon. 
+We use Open Router's GPT-3.5-turbo model , more to come soon...
+
+### 3.6 PineCone vector store 
+
+In scripts/uploadToPinecone we provide utils to seed your pinecone database. Just have data be uploaded to the data folder in json and write the command npm run upload-to-pinecone. Note at this time you will have to update the function or the file structure to match the uploadToPinecone json format. 
+
+#######TODO: Update so most jsons can be transposed into this format. 
 
 ## 4. Key Features
 
