@@ -1,155 +1,166 @@
-'use client';
+'use client'
 
-import { Box, Button, Stack, TextField } from '@mui/material';
-import { useState, useRef, useEffect } from'react';
+import React, { useState } from 'react';
+import { Button, Typography, Box, Container, Grid, AppBar, Toolbar, Modal, useTheme, useMediaQuery } from '@mui/material';
+import ChatIcon from '@mui/icons-material/Chat';
+import SecurityIcon from '@mui/icons-material/Security';
+import HistoryIcon from '@mui/icons-material/History';
+import HealthAndSafetyIcon from '@mui/icons-material/HealthAndSafety';
+import Auth from './components/Auth';
+import PopupChat from './components/PopupChat';
 
-export default function Home() {
-  const [messages, setMessages] = useState([
-    {
-      role: 'assistant',
-      content: "Hello! I'm your health assistant. How can I assist you today? ",
-    },
-  ]);
-  const [message, setMessage] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
+const Feature = ({ icon, title, description }) => (
+  <Box sx={{ textAlign: 'center', p: 2 }}>
+    {icon}
+    <Typography variant="h6" component="h3" sx={{ my: 2 }}>
+      {title}
+    </Typography>
+    <Typography variant="body2" color="text.secondary">
+      {description}
+    </Typography>
+  </Box>
+);
 
-  const messagesEndRef = useRef(null);
+export default function LandingPage() {
+  const [authOpen, setAuthOpen] = useState(false);
+  const [isLogin, setIsLogin] = useState(true);
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior:'smooth' });
+  const handleAuthOpen = (loginMode) => {
+    setIsLogin(loginMode);
+    setAuthOpen(true);
   };
 
-  useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
-
-  const sendMessage = async () => {
-    if (!message.trim() || isLoading) return;
-    setIsLoading(true);
-    setMessage('');
-    setMessages((messages) => [...messages, { role: 'user', content: message }]);
-
-    try {
-      const response = await fetch('/api/chat', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ messages: [...messages, { role: 'user', content: message }] }),
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const data = await response.json();
-      const assistantMessage = data.choices[0].message.content;
-
-      setMessages((messages) => [...messages, { role: 'assistant', content: assistantMessage }]);
-    } catch (error) {
-      console.error('Error:', error);
-      setMessages((messages) => [
-       ...messages,
-        {
-          role: 'assistant',
-          content: "I'm sorry, but I encountered an error. Please try again later.",
-        },
-      ]);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleKeyPress = (event) => {
-    if (event.key === 'Enter' &&!event.shiftKey) {
-      event.preventDefault();
-      sendMessage();
-    }
+  const handleAuthClose = () => {
+    setAuthOpen(false);
   };
 
   return (
-    <Box
-      width="100vw"
-      height="100vh"
-      display="flex"
-      flexDirection="column"
-      justifyContent="center"
-      alignItems="center"
-    >
-      <Stack
-        direction={'column'}
-        width="500px"
-        height="500px"
-        border="1px solid black"
-        p={2}
-        spacing={3}
+    <Box>
+      <AppBar position="fixed" color="transparent" elevation={0} sx={{ backdropFilter: 'blur(10px)' }}>
+        <Toolbar>
+          <HealthAndSafetyIcon sx={{ mr: 2, color: 'primary.main' }} />
+          <Typography variant="h6" component="div" sx={{ flexGrow: 1, fontWeight: 'bold', color: 'primary.main' }}>
+            HealthChat AI
+          </Typography>
+          <Button color="primary" onClick={() => handleAuthOpen(true)} sx={{ mr: 1 }}>Login</Button>
+          <Button color="primary" variant="contained" onClick={() => handleAuthOpen(false)}>Sign Up</Button>
+        </Toolbar>
+      </AppBar>
+      <Box
+        sx={{
+          backgroundImage: 'url("/images/Health_background_1.png")',
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          minHeight: '100vh',
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'center',
+          alignItems: 'center',
+          color: 'white',
+          textAlign: 'center',
+          pt: 8,
+          '&::before': {
+            content: '""',
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: 'rgba(0, 0, 0, 0.5)',
+            zIndex: -1,
+          },
+        }}
       >
-        <Stack
-          direction={'column'}
-          spacing={2}
-          flexGrow={1}
-          overflow="auto"
-          maxHeight="100%"
-        >
-          {messages.map((message, index) => (
-            <Box
-              key={index}
-              display="flex"
-              justifyContent={message.role === 'assistant'? 'flex-start' : 'flex-end'}
-            >
-              <Box
-                bgcolor={message.role === 'assistant'? '#d0f0c0' : '#b0e57c'}
-                color="black"
-                borderRadius={16}
-                p={3}
-              >
-                {message.content}
-              </Box>
-            </Box>
-          ))}
-          <div ref={messagesEndRef} />
-        </Stack>
-        <Stack direction={'row'} spacing={2} alignItems="center">
-          <TextField
-            label="Describe your symptoms or request a medicine"
-            fullWidth
-            value={message}
-            onChange={(e) => setMessage(e.target.value)}
-            onKeyPress={handleKeyPress}
-            disabled={isLoading}
-            sx={{
-              backgroundColor: '#f0f0f0',
-              borderRadius: '8px',
-              '&.MuiInputBase-root': {
-                backgroundColor: 'inherit',
-              },
-              '&.Mui-disabled': {
-                backgroundColor: '#e0e0e0',
-              },
-              height: '56px',
-            }}
-          />
+        <Container maxWidth="md" sx={{ position: 'relative', zIndex: 2, backgroundColor: 'rgba(0, 0, 0, 0.5)', paddingBottom: '1rem' }}>
+          <Typography variant={isMobile ? 'h3' : 'h2'} component="h1" gutterBottom fontWeight="bold">
+            Your Personal Health Assistant
+          </Typography>
+          <Typography variant="h5" component="h2" gutterBottom>
+            Get instant answers to your health questions
+          </Typography>
           <Button
             variant="contained"
-            onClick={sendMessage}
-            disabled={isLoading}
-            sx={{
-              backgroundColor: '#232323',
-              color: 'white',
-              border: '1px solid #ccc',
-              height: '56px',
-              '&:hover': {
-                backgroundColor: '#1f1f1f',
-              },
-              '&:active': {
-                backgroundColor: '#000000',
-              },
-            }}
+            size="large"
+            startIcon={<ChatIcon />}
+            sx={{ mt: 4, fontSize: '1.2rem', py: 1.5, px: 4 }}
           >
-            {isLoading? 'Sending...' : 'Send'}
+            Start Chatting Now
           </Button>
-        </Stack>
-      </Stack>
+        </Container>
+      </Box>
+
+      <Container maxWidth="lg" sx={{ my: 8 }}>
+        <Typography variant="h4" component="h2" textAlign="center" gutterBottom fontWeight="bold">
+          Why Choose HealthChat AI?
+        </Typography>
+        <Grid container spacing={4} sx={{ mt: 4 }}>
+          <Grid item xs={12} md={4}>
+            <Feature
+              icon={<ChatIcon sx={{ fontSize: 40, color: 'primary.main' }} />}
+              title="Instant Responses"
+              description="Get quick and accurate answers to your health questions anytime, anywhere."
+            />
+          </Grid>
+          <Grid item xs={12} md={4}>
+            <Feature
+              icon={<SecurityIcon sx={{ fontSize: 40, color: 'primary.main' }} />}
+              title="Privacy Focused"
+              description="Your health information is always kept confidential and secure."
+            />
+          </Grid>
+          <Grid item xs={12} md={4}>
+            <Feature
+              icon={<HistoryIcon sx={{ fontSize: 40, color: 'primary.main' }} />}
+              title="Personalized Experience"
+              description="Our AI learns from your interactions to provide tailored health advice."
+            />
+          </Grid>
+        </Grid>
+      </Container>
+
+      <Box sx={{ bgcolor: 'background.paper', py: 8 }}>
+        <Container maxWidth="md">
+          <Typography variant="h4" component="h2" textAlign="center" gutterBottom fontWeight="bold">
+            Ready to take control of your health?
+          </Typography>
+          <Typography variant="body1" textAlign="center" paragraph>
+            Join thousands of users who trust HealthChat AI for their health inquiries.
+          </Typography>
+          <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
+            <Button variant="contained" size="large" onClick={() => handleAuthOpen(false)} sx={{ mr: 2 }}>
+              Sign Up Now
+            </Button>
+            <Button variant="outlined" size="large" onClick={() => handleAuthOpen(true)}>
+              Login
+            </Button>
+          </Box>
+        </Container>
+      </Box>
+
+      <Modal
+        open={authOpen}
+        onClose={handleAuthClose}
+        aria-labelledby="auth-modal-title"
+        aria-describedby="auth-modal-description"
+      >
+        <Box sx={{
+          position: 'absolute',
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+          width: 400,
+          bgcolor: 'background.paper',
+          boxShadow: 24,
+          p: 4,
+          borderRadius: 2,
+        }}>
+          <Auth isLogin={isLogin} onClose={handleAuthClose} />
+        </Box>
+      </Modal>
+
+      <PopupChat />
     </Box>
   );
 }
