@@ -1,11 +1,10 @@
 'use client'
-
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Box, List, ListItem, ListItemText, Typography, Divider, Button, AppBar, Toolbar, IconButton, Avatar, TextField, Tooltip } from '@mui/material';
 import { ThemeProvider, createTheme, styled } from '@mui/material/styles';
 import { auth, db } from '../utils/firebase';
-import { collection, query, where, orderBy, onSnapshot, addDoc, serverTimestamp, updateDoc, doc } from 'firebase/firestore';
+import { collection, query, where, orderBy, onSnapshot, addDoc, serverTimestamp, updateDoc, doc } from 'firebase/firestore'
 import ChatComponent from '../components/Chat';
 import AddIcon from '@mui/icons-material/Add';
 import ExitToAppIcon from '@mui/icons-material/ExitToApp';
@@ -80,18 +79,21 @@ export default function ChatPage() {
   const router = useRouter();
 
   useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged((user) => {
-      setUser(user);
-      if (!user) {
+    const unsubscribe = auth.onAuthStateChanged((currentUser) => {
+      setUser(currentUser);
+      if (!currentUser) {
         router.push('/');
       } else {
-        const chatsQuery = query(
-          collection(db, 'chats'),
-          where('userId', '==', user.uid),
+        // Access the user's specific document
+        const userDocRef = doc(db, 'users', currentUser.uid);
+        
+        // Query the conversations subcollection
+        const conversationsQuery = query(
+          collection(userDocRef, 'conversations'),
           orderBy('createdAt', 'desc')
         );
 
-        const chatsUnsubscribe = onSnapshot(chatsQuery, (snapshot) => {
+        const chatsUnsubscribe = onSnapshot(conversationsQuery, (snapshot) => {
           const chatList = snapshot.docs.map(doc => ({
             id: doc.id,
             ...doc.data()
@@ -111,8 +113,8 @@ export default function ChatPage() {
 
   const startNewChat = async () => {
     try {
-      const newChatRef = await addDoc(collection(db, 'chats'), {
-        userId: user.uid,
+      const userDocRef = doc(db, 'users', user.uid);
+      const newChatRef = await addDoc(collection(userDocRef, 'conversations'), {
         createdAt: serverTimestamp(),
         title: 'New Chat'
       });
@@ -121,7 +123,6 @@ export default function ChatPage() {
       console.error('Error creating new chat:', error);
     }
   };
-
   const handleLogout = async () => {
     try {
       await auth.signOut();

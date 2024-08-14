@@ -8,6 +8,9 @@ import HistoryIcon from '@mui/icons-material/History';
 import HealthAndSafetyIcon from '@mui/icons-material/HealthAndSafety';
 import Auth from './components/Auth';
 import PopupChat from './components/PopupChat';
+import { useAuthState } from 'react-firebase-hooks/auth';
+import { auth } from './utils/firebase';
+import { useRouter } from 'next/navigation';
 
 const Feature = ({ icon, title, description }) => (
   <Box sx={{ textAlign: 'center', p: 2 }}>
@@ -24,6 +27,8 @@ const Feature = ({ icon, title, description }) => (
 export default function LandingPage() {
   const [authOpen, setAuthOpen] = useState(false);
   const [isLogin, setIsLogin] = useState(true);
+  const [healthBotOpen, setHealthBotOpen] = useState(false);
+  const [user, setUser] = useState(null);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
@@ -35,6 +40,26 @@ export default function LandingPage() {
   const handleAuthClose = () => {
     setAuthOpen(false);
   };
+
+  const handleTryHealthBot = () => {
+    setHealthBotOpen(true);
+  };
+
+  const handleCloseHealthBot = () => {
+    setHealthBotOpen(false);
+  };
+  
+
+  const handleEnterChatRoom = () => {
+    if (user) {
+      // Navigate to chat room
+      router.push('/chat');
+    } else {
+      // Open auth modal
+      handleAuthOpen(true);
+    }
+  };
+
 
   return (
     <Box>
@@ -80,14 +105,25 @@ export default function LandingPage() {
           <Typography variant="h5" component="h2" gutterBottom>
             Get instant answers to your health questions
           </Typography>
-          <Button
-            variant="contained"
-            size="large"
-            startIcon={<ChatIcon />}
-            sx={{ mt: 4, fontSize: '1.2rem', py: 1.5, px: 4 }}
-          >
-            Start Chatting Now
-          </Button>
+          <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4, gap: 2 }}>
+            <Button
+              variant="contained"
+              size="large"
+              startIcon={<ChatIcon />}
+              onClick={handleTryHealthBot}
+              sx={{ fontSize: '1.2rem', py: 1.5, px: 4 }}
+            >
+              Try HealthBot
+            </Button>
+            <Button
+              variant="outlined"
+              size="large"
+              onClick={handleEnterChatRoom}
+              sx={{ fontSize: '1.2rem', py: 1.5, px: 4, color: 'white', borderColor: 'white' }}
+            >
+              Enter Chat
+            </Button>
+          </Box>
         </Container>
       </Box>
 
@@ -123,10 +159,10 @@ export default function LandingPage() {
       <Box sx={{ bgcolor: 'background.paper', py: 8 }}>
         <Container maxWidth="md">
           <Typography variant="h4" component="h2" textAlign="center" gutterBottom fontWeight="bold">
-            Ready to take control of your health?
+            Ready to have the best health information at your fingertips?
           </Typography>
           <Typography variant="body1" textAlign="center" paragraph>
-            Join thousands of users who trust HealthChat AI for their health inquiries.
+            Start chatting with HealthBot today.
           </Typography>
           <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
             <Button variant="contained" size="large" onClick={() => handleAuthOpen(false)} sx={{ mr: 2 }}>
@@ -160,7 +196,13 @@ export default function LandingPage() {
         </Box>
       </Modal>
 
-      <PopupChat />
+    {/* HealthBot PopupChat */}
+    {healthBotOpen && (
+        <PopupChat user={user} onClose={handleCloseHealthBot} />
+      )}
+
+      {/* Floating chat button */}
+      <PopupChat user={user} />
     </Box>
   );
 }
