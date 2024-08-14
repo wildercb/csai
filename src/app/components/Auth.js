@@ -2,13 +2,15 @@
 
 import React, { useState } from 'react';
 import { Button, TextField, Typography, Box, Tabs, Tab } from '@mui/material';
-import { auth, googleProvider } from  '../utils/firebase';
+import { auth, googleProvider } from '../utils/firebase';
 import { signInWithPopup, createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
+import { useRouter } from 'next/navigation';
 
 export default function Auth({ isLogin: initialIsLogin, onClose }) {
   const [isLogin, setIsLogin] = useState(initialIsLogin);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const router = useRouter();
 
   const handleAuth = async (e) => {
     e.preventDefault();
@@ -19,6 +21,7 @@ export default function Auth({ isLogin: initialIsLogin, onClose }) {
         await createUserWithEmailAndPassword(auth, email, password);
       }
       onClose();
+      router.push('/chat');
     } catch (error) {
       console.error(error);
       alert(error.message);
@@ -29,6 +32,7 @@ export default function Auth({ isLogin: initialIsLogin, onClose }) {
     try {
       await signInWithPopup(auth, googleProvider);
       onClose();
+      router.push('/chat');
     } catch (error) {
       console.error(error);
       alert(error.message);
