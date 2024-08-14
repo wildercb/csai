@@ -1,5 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Box, TextField, Button, Typography, CircularProgress } from '@mui/material';
+import { Box, TextField, Button, Typography, CircularProgress, Paper, Avatar } from '@mui/material';
+import SendIcon from '@mui/icons-material/Send';
+import SmartToyIcon from '@mui/icons-material/SmartToy';
+import PersonIcon from '@mui/icons-material/Person';
 
 export default function ChatComponent({ chatId, user }) {
   const [messages, setMessages] = useState([
@@ -22,7 +25,6 @@ export default function ChatComponent({ chatId, user }) {
     setIsLoading(true);
 
     try {
-      console.log("fetching")
       const response = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -42,44 +44,85 @@ export default function ChatComponent({ chatId, user }) {
   };
 
   return (
-    <>
+    <Box display="flex" flexDirection="column" height="100%">
       <Box flexGrow={1} overflowY="auto" p={2}>
         {messages.map((msg, index) => (
-          <Box key={index} sx={{ mb: 2, textAlign: msg.role === 'user' ? 'right' : 'left' }}>
-            <Typography
+          <Box key={index} sx={{ display: 'flex', justifyContent: msg.role === 'user' ? 'flex-end' : 'flex-start', mb: 2 }}>
+            <Paper
+              elevation={1}
               sx={{
-                display: 'inline-block',
-                bgcolor: msg.role === 'user' ? 'primary.light' : 'grey.200',
-                p: 1,
-                borderRadius: 1,
+                p: 2,
+                maxWidth: '70%',
+                bgcolor: msg.role === 'user' ? 'primary.light' : 'background.paper',
+                borderRadius: msg.role === 'user' ? '20px 20px 0 20px' : '20px 20px 20px 0',
               }}
             >
-              {msg.content}
-            </Typography>
+              <Box display="flex" alignItems="center" mb={1}>
+                <Avatar sx={{ bgcolor: msg.role === 'user' ? 'primary.main' : 'secondary.main', width: 24, height: 24, mr: 1 }}>
+                  {msg.role === 'user' ? <PersonIcon fontSize="small" /> : <SmartToyIcon fontSize="small" />}
+                </Avatar>
+                <Typography variant="subtitle2" fontWeight="bold">
+                  {msg.role === 'user' ? 'You' : 'HealthChat AI'}
+                </Typography>
+              </Box>
+              <Typography variant="body1">{msg.content}</Typography>
+            </Paper>
           </Box>
         ))}
+        {isLoading && (
+          <Box sx={{ display: 'flex', justifyContent: 'flex-start', mb: 2 }}>
+            <Paper
+              elevation={1}
+              sx={{
+                p: 2,
+                maxWidth: '70%',
+                bgcolor: 'background.paper',
+                borderRadius: '20px 20px 20px 0',
+              }}
+            >
+              <Box display="flex" alignItems="center">
+                <Avatar sx={{ bgcolor: 'secondary.main', width: 24, height: 24, mr: 1 }}>
+                  <SmartToyIcon fontSize="small" />
+                </Avatar>
+                <Typography variant="subtitle2" fontWeight="bold">
+                  HealthChat AI
+                </Typography>
+              </Box>
+              <Box sx={{ display: 'flex', alignItems: 'center', mt: 1 }}>
+                <CircularProgress size={20} sx={{ mr: 1 }} />
+                <Typography variant="body2">Thinking...</Typography>
+              </Box>
+            </Paper>
+          </Box>
+        )}
         <div ref={messagesEndRef} />
       </Box>
-      <Box sx={{ p: 2, borderTop: 1, borderColor: 'divider' }}>
+      <Box sx={{ p: 2, borderTop: 1, borderColor: 'divider', bgcolor: 'background.paper' }}>
         <TextField
           fullWidth
           variant="outlined"
-          placeholder="Type your message..."
+          placeholder="Type your health question..."
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          onKeyPress={(e) => e.key === 'Enter' && handleSend()}
+          onKeyPress={(e) => e.key === 'Enter' && !e.shiftKey && handleSend()}
+          multiline
+          maxRows={4}
           disabled={isLoading}
+          InputProps={{
+            endAdornment: (
+              <Button
+                onClick={handleSend}
+                variant="contained"
+                color="primary"
+                disabled={isLoading}
+                sx={{ minWidth: 'auto', p: '10px' }}
+              >
+                {isLoading ? <CircularProgress size={24} /> : <SendIcon />}
+              </Button>
+            ),
+          }}
         />
-        <Button 
-          onClick={handleSend} 
-          sx={{ mt: 1 }} 
-          variant="contained" 
-          fullWidth
-          disabled={isLoading}
-        >
-          {isLoading ? <CircularProgress size={24} /> : 'Send'}
-        </Button>
       </Box>
-    </>
+    </Box>
   );
 }

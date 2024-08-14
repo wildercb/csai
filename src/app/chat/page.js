@@ -1,28 +1,27 @@
 'use client'
+
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Box, List, ListItem, ListItemText, Typography, Divider, Button, AppBar, Toolbar, IconButton, Avatar, TextField, Tooltip } from '@mui/material';
+import { Box, List, ListItem, ListItemText, Typography, Button, AppBar, Toolbar, IconButton, Avatar, Tooltip } from '@mui/material';
 import { ThemeProvider, createTheme, styled } from '@mui/material/styles';
 import { auth, db } from '../utils/firebase';
-import { collection, query, where, orderBy, onSnapshot, addDoc, serverTimestamp, updateDoc, doc } from 'firebase/firestore'
+import { collection, query, where, orderBy, onSnapshot, addDoc, serverTimestamp, updateDoc, doc } from 'firebase/firestore';
 import ChatComponent from '../components/Chat';
 import AddIcon from '@mui/icons-material/Add';
 import ExitToAppIcon from '@mui/icons-material/ExitToApp';
-import HealthAndSafetyIcon from '@mui/icons-material/HealthAndSafety';
-import EditIcon from '@mui/icons-material/Edit';
-import DeleteIcon from '@mui/icons-material/Delete';
+import MedicalServicesIcon from '@mui/icons-material/MedicalServices';
+import InfoIcon from '@mui/icons-material/Info';
 
-// Custom theme
 const theme = createTheme({
   palette: {
     primary: {
-      main: '#1976d2',
+      main: '#0077be',
     },
     secondary: {
-      main: '#2196f3',
+      main: '#4caf50',
     },
     background: {
-      default: '#f5f5f5',
+      default: '#f0f4f8',
       paper: '#ffffff',
     },
   },
@@ -40,7 +39,6 @@ const theme = createTheme({
   },
 });
 
-// Styled components
 const StyledAppBar = styled(AppBar)(({ theme }) => ({
   backgroundColor: theme.palette.primary.main,
   color: theme.palette.primary.contrastText,
@@ -72,6 +70,13 @@ const MainContent = styled(Box)({
   backgroundColor: '#f5f5f5',
 });
 
+const DisclaimerBox = styled(Box)(({ theme }) => ({
+  backgroundColor: theme.palette.warning.light,
+  padding: theme.spacing(2),
+  marginBottom: theme.spacing(2),
+  borderRadius: theme.shape.borderRadius,
+}));
+
 export default function ChatPage() {
   const [user, setUser] = useState(null);
   const [chats, setChats] = useState([]);
@@ -79,21 +84,18 @@ export default function ChatPage() {
   const router = useRouter();
 
   useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged((currentUser) => {
-      setUser(currentUser);
-      if (!currentUser) {
+    const unsubscribe = auth.onAuthStateChanged((user) => {
+      setUser(user);
+      if (!user) {
         router.push('/');
       } else {
-        // Access the user's specific document
-        const userDocRef = doc(db, 'users', currentUser.uid);
-        
-        // Query the conversations subcollection
-        const conversationsQuery = query(
-          collection(userDocRef, 'conversations'),
+        const chatsQuery = query(
+          collection(db, 'chats'),
+          where('userId', '==', user.uid),
           orderBy('createdAt', 'desc')
         );
 
-        const chatsUnsubscribe = onSnapshot(conversationsQuery, (snapshot) => {
+        const chatsUnsubscribe = onSnapshot(chatsQuery, (snapshot) => {
           const chatList = snapshot.docs.map(doc => ({
             id: doc.id,
             ...doc.data()
@@ -113,8 +115,8 @@ export default function ChatPage() {
 
   const startNewChat = async () => {
     try {
-      const userDocRef = doc(db, 'users', user.uid);
-      const newChatRef = await addDoc(collection(userDocRef, 'conversations'), {
+      const newChatRef = await addDoc(collection(db, 'chats'), {
+        userId: user.uid,
         createdAt: serverTimestamp(),
         title: 'New Chat'
       });
@@ -123,6 +125,7 @@ export default function ChatPage() {
       console.error('Error creating new chat:', error);
     }
   };
+
   const handleLogout = async () => {
     try {
       await auth.signOut();
@@ -145,16 +148,20 @@ export default function ChatPage() {
       <Box display="flex" flexDirection="column" height="100vh">
         <AppBar position="static">
           <Toolbar>
-            <HealthAndSafetyIcon sx={{ mr: 2 }} />
+            <MedicalServicesIcon sx={{ mr: 2 }} />
             <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-              Medical Health AI Assistant
+              HealthChat AI Assistant
             </Typography>
-            <IconButton color="inherit" onClick={startNewChat}>
-              <AddIcon />
-            </IconButton>
-            <IconButton color="inherit" onClick={handleLogout}>
-              <ExitToAppIcon />
-            </IconButton>
+            <Tooltip title="Start a new chat">
+              <IconButton color="inherit" onClick={startNewChat}>
+                <AddIcon />
+              </IconButton>
+            </Tooltip>
+            <Tooltip title="Log out">
+              <IconButton color="inherit" onClick={handleLogout}>
+                <ExitToAppIcon />
+              </IconButton>
+            </Tooltip>
           </Toolbar>
         </AppBar>
         <Box display="flex" flexGrow={1}>
@@ -164,24 +171,30 @@ export default function ChatPage() {
             </Box>
             <List>
               {chats.map((chat) => (
-                <ListItem 
+                <ChatListItem
                   key={chat.id}
-                  button 
+                  button
                   onClick={() => setSelectedChat(chat.id)}
                   selected={selectedChat === chat.id}
                 >
                   <Avatar sx={{ mr: 2, bgcolor: 'secondary.main' }}>
                     {chat.title ? chat.title[0].toUpperCase() : 'C'}
                   </Avatar>
-                  <ListItemText 
-                    primary={chat.title || 'Untitled Chat'} 
+                  <ListItemText
+                    primary={chat.title || 'Untitled Chat'}
                     secondary={chat.createdAt ? new Date(chat.createdAt.toDate()).toLocaleString() : 'Just now'}
                   />
-                </ListItem>
+                </ChatListItem>
               ))}
             </List>
           </ChatListContainer>
           <MainContent>
+            <DisclaimerBox>
+              <Typography variant="body2" color="text.secondary">
+                <InfoIcon sx={{ verticalAlign: 'middle', mr: 1 }} />
+                Disclaimer: This AI assistant provides general health information and is not a substitute for professional medical advice, diagnosis, or treatment. Always consult with a qualified healthcare provider for medical concerns.
+              </Typography>
+            </DisclaimerBox>
             <ChatComponent chatId={selectedChat} user={user} />
           </MainContent>
         </Box>
