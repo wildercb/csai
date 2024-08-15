@@ -14,21 +14,33 @@ const PINECONE_API_KEY = process.env.PINECONE_API_KEY;
 const PINECONE_ENVIRONMENT = process.env.PINECONE_ENVIRONMENT;
 const PINECONE_INDEX_NAME = process.env.PINECONE_INDEX_NAME;
 const PINECONE_IDX_URL = process.env.PINECONE_IDX_URL;
+const PINECONE_INDEX_SECONDARY = process.env.PINECONE_INDEX_SECONDARY;
+
+
 
 let pinecone = null;
 
-async function initPinecone() {
+async function initPinecone(index_name) {
 
   const pc = new Pinecone({ apiKey: PINECONE_API_KEY });
-  const index = pc.index(PINECONE_INDEX_NAME);
-
+  const index = pc.index(index_name);
+  
   console.log("index?")
   return index;
 }
 
-async function queryPinecone(query) {  
+async function initPineconeSecondary() {
+
+  const pc = new Pinecone({ apiKey: PINECONE_API_KEY });
+  const index = pc.index(PINECONE_INDEX_SECONDARY);
+  
+  console.log("index?")
+  return index;
+}
+
+async function queryPinecone(query, index_name) {  
   try {
-    const index = await initPinecone();
+    const index = await initPinecone(index_name);
     
     console.log("Creating embeddings...");
     const embeddings = new OpenAIEmbeddings({
@@ -71,7 +83,9 @@ export async function POST(req) {
   try {
     
     const userMessage = messages[messages.length - 1].content;
-    const relevantDocs = await queryPinecone(userMessage);
+    const relevantDocs = await queryPinecone(userMessage, PINECONE_INDEX_NAME);
+    const relevantDocsSecondary = await queryPinecone(userMessage, PINECONE_INDEX_SECONDARY);
+
     
     console.log("Relevant documents:", relevantDocs);
     
@@ -80,7 +94,7 @@ export async function POST(req) {
       content: 
       `You are a helpful health assistant. Use the following information to answer the user's question, 
       but do not reference the information directly. If the information doesn't help answer the question, 
-      use your general knowledge: ${relevantDocs.join("\n\n")}`,
+      use your general knowledge: ${relevantDocs.join("\n\n")}, ${relevantDocsSecondary.join("\n\n")}`,
     };
 
     const augmentedMessages = [systemMessage, ...messages];
