@@ -259,7 +259,7 @@ export default function LandingPage() {
       <Box sx={{ 
         position: 'relative',
         overflow: 'hidden',
-        background: 'linear-gradient(135deg, #0a2463, #3e92cc)',
+        background: 'linear-gradient(135deg, #0a2463 0%, #000000 100%)',
         '&::before': {
           content: '""',
           position: 'absolute',
@@ -267,14 +267,14 @@ export default function LandingPage() {
           left: 0,
           right: 0,
           bottom: 0,
-          backgroundImage: 'url("/images/dna-pattern.png")',
-          backgroundSize: '200px',
-          opacity: 0.05,
-          animation: 'move 30s linear infinite',
+          backgroundImage: 'radial-gradient(white, rgba(255,255,255,.2) 2px, transparent 40px), radial-gradient(white, rgba(255,255,255,.15) 1px, transparent 30px), radial-gradient(white, rgba(255,255,255,.1) 2px, transparent 40px), radial-gradient(rgba(255,255,255,.4), rgba(255,255,255,.1) 2px, transparent 30px)',
+          backgroundSize: '550px 550px, 350px 350px, 250px 250px, 150px 150px',
+          backgroundPosition: '0 0, 40px 60px, 130px 270px, 70px 100px',
+          animation: 'twinkle 10s infinite linear',
         },
-        '@keyframes move': {
-          '0%': { backgroundPosition: '0 0' },
-          '100%': { backgroundPosition: '200px 200px' },
+        '@keyframes twinkle': {
+          '0%': { backgroundPosition: '0 0, 40px 60px, 130px 270px, 70px 100px' },
+          '100%': { backgroundPosition: '0 -550px, 40px -490px, 130px -280px, 70px -450px' },
         },
       }}>
         <Container maxWidth="md" sx={{ position: 'relative', zIndex: 2, py: 8 }}>
@@ -354,42 +354,6 @@ export default function LandingPage() {
             </Button>
           </Box>
         </Container>
-        
-        {/* Decorative Elements */}
-        <Box 
-          component="img"
-          src="/images/health-bot-icon.png" 
-          alt="Health Bot Icon"
-          sx={{
-            position: 'absolute',
-            bottom: '-30px',
-            right: '-30px',
-            width: '200px',
-            height: '200px',
-            opacity: 0.15,
-            transform: 'rotate(-15deg)',
-          }}
-        />
-        {[...Array(15)].map((_, i) => (
-          <Box
-            key={i}
-            sx={{
-              position: 'absolute',
-              top: `${Math.random() * 100}%`,
-              left: `${Math.random() * 100}%`,
-              width: `${Math.random() * 8 + 4}px`,
-              height: `${Math.random() * 8 + 4}px`,
-              borderRadius: '50%',
-              backgroundColor: 'rgba(255,255,255,0.3)',
-              animation: `float ${Math.random() * 8 + 4}s infinite linear`,
-              '@keyframes float': {
-                '0%': { transform: 'translateY(0)' },
-                '50%': { transform: 'translateY(-15px)' },
-                '100%': { transform: 'translateY(0)' },
-              },
-            }}
-          />
-        ))}
       </Box>
 
       <Modal
