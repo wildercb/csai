@@ -11,7 +11,18 @@ const firebaseConfig = {
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID
 };
 
+// Initialize Firebase
 const app = initializeApp(firebaseConfig);
-export const auth = getAuth(app);
+
+// Initialize Auth with custom domain
+const auth = getAuth(app);
+auth.useDeviceLanguage();
+
+// Set custom auth domain if provided
+if (process.env.NEXT_PUBLIC_AUTH_DOMAIN) {
+  auth.config.authDomain = process.env.NEXT_PUBLIC_AUTH_DOMAIN;
+}
+
+export { auth };
 export const googleProvider = new GoogleAuthProvider();
 export const db = getFirestore(app);

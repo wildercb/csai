@@ -1,28 +1,54 @@
 'use client'
 
-import React, { useState } from 'react';
-import { Button, Typography, Box, Container, Grid, AppBar, Toolbar, Modal, useTheme, useMediaQuery } from '@mui/material';
+import React, { useState, useEffect } from 'react';
+import { Button, Typography, Box, Container, AppBar, Toolbar, Modal, useTheme, useMediaQuery } from '@mui/material';
 import ChatIcon from '@mui/icons-material/Chat';
 import SecurityIcon from '@mui/icons-material/Security';
-import HistoryIcon from '@mui/icons-material/History';
 import HealthAndSafetyIcon from '@mui/icons-material/HealthAndSafety';
 import Auth from './components/Auth';
 import PopupChat from './components/PopupChat';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { auth } from './utils/firebase';
 import { useRouter } from 'next/navigation';
+import { motion, useAnimation } from 'framer-motion';
 
-const Feature = ({ icon, title, description }) => (
-  <Box sx={{ textAlign: 'center', p: 2 }}>
-    {icon}
-    <Typography variant="h6" component="h3" sx={{ my: 2 }}>
-      {title}
-    </Typography>
-    <Typography variant="body2" color="text.secondary">
-      {description}
-    </Typography>
-  </Box>
-);
+const FeatureCard = ({ icon, title, description }) => {
+  return (
+    <Box
+      sx={{
+        backgroundColor: 'rgba(255, 255, 255, 0.1)',
+        borderRadius: '20px',
+        padding: '2rem',
+        height: '100%', // This ensures the card takes full height of its container
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        transition: 'transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out',
+        '&:hover': {
+          transform: 'translateY(-10px)',
+          boxShadow: '0 10px 20px rgba(0, 0, 0, 0.2)',
+        },
+      }}
+    >
+      <Box
+        sx={{
+          backgroundColor: 'primary.main',
+          borderRadius: '50%',
+          padding: '1rem',
+          marginBottom: '1rem',
+        }}
+      >
+        {icon}
+      </Box>
+      <Typography variant="h6" component="h3" sx={{ mb: 2, color: 'white', textAlign: 'center' }}>
+        {title}
+      </Typography>
+      <Typography variant="body2" sx={{ color: 'rgba(255, 255, 255, 0.8)', textAlign: 'center', flexGrow: 1 }}>
+        {description}
+      </Typography>
+    </Box>
+  );
+};
 
 export default function LandingPage() {
   const [authOpen, setAuthOpen] = useState(false);
@@ -31,6 +57,7 @@ export default function LandingPage() {
   const [user, setUser] = useState(null);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  const router = useRouter();
 
   const handleAuthOpen = (loginMode) => {
     setIsLogin(loginMode);
@@ -48,18 +75,14 @@ export default function LandingPage() {
   const handleCloseHealthBot = () => {
     setHealthBotOpen(false);
   };
-  
 
   const handleEnterChatRoom = () => {
     if (user) {
-      // Navigate to chat room
       router.push('/chat');
     } else {
-      // Open auth modal
       handleAuthOpen(true);
     }
   };
-
 
   return (
     <Box>
@@ -73,6 +96,8 @@ export default function LandingPage() {
           <Button color="primary" variant="contained" onClick={() => handleAuthOpen(false)}>Sign Up</Button>
         </Toolbar>
       </AppBar>
+
+      {/* Hero Section */}
       <Box
         sx={{
           backgroundImage: 'url("/images/Health_background_1.png")',
@@ -98,11 +123,38 @@ export default function LandingPage() {
           },
         }}
       >
-        <Container maxWidth="md" sx={{ position: 'relative', zIndex: 2, backgroundColor: 'rgba(0, 0, 0, 0.5)', paddingBottom: '1rem' }}>
-          <Typography variant={isMobile ? 'h3' : 'h2'} component="h1" gutterBottom fontWeight="bold">
+        <Container maxWidth="md" sx={{ 
+          position: 'relative', 
+          zIndex: 2, 
+          backgroundColor: 'rgba(255, 255, 255, 0.1)',
+          backdropFilter: 'blur(10px)',
+          borderRadius: '20px',
+          padding: '3rem 2rem',
+          boxShadow: '0 4px 30px rgba(0, 0, 0, 0.1)',
+          border: '1px solid rgba(255, 255, 255, 0.2)',
+          background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05))',
+        }}>
+          <Typography 
+            variant={isMobile ? 'h3' : 'h2'} 
+            component="h1" 
+            gutterBottom 
+            fontWeight="bold"
+            sx={{
+              color: '#ffffff',
+              textShadow: '2px 2px 4px rgba(0, 0, 0, 0.3)',
+            }}
+          >
             Your Personal Health Assistant
           </Typography>
-          <Typography variant="h5" component="h2" gutterBottom>
+          <Typography 
+            variant="h5" 
+            component="h2" 
+            gutterBottom
+            sx={{
+              color: 'rgba(255, 255, 255, 0.9)',
+              mb: 4,
+            }}
+          >
             Get instant answers to your health questions
           </Typography>
           <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4, gap: 2 }}>
@@ -111,7 +163,16 @@ export default function LandingPage() {
               size="large"
               startIcon={<ChatIcon />}
               onClick={handleTryHealthBot}
-              sx={{ fontSize: '1.2rem', py: 1.5, px: 4 }}
+              sx={{ 
+                fontSize: '1.2rem', 
+                py: 1.5, 
+                px: 4,
+                backgroundColor: '#ffe66d',
+                color: '#333',
+                '&:hover': {
+                  backgroundColor: '#fff7aa',
+                },
+              }}
             >
               Try HealthBot
             </Button>
@@ -119,60 +180,216 @@ export default function LandingPage() {
               variant="outlined"
               size="large"
               onClick={handleEnterChatRoom}
-              sx={{ fontSize: '1.2rem', py: 1.5, px: 4, color: 'white', borderColor: 'white' }}
+              sx={{ 
+                fontSize: '1.2rem', 
+                py: 1.5, 
+                px: 4, 
+                color: 'white', 
+                borderColor: 'white',
+                '&:hover': {
+                  borderColor: '#ffe66d',
+                  color: '#ffe66d',
+                },
+              }}
             >
               Enter Chat
             </Button>
           </Box>
-        </Container>
+        </Container>  
       </Box>
 
-      <Container maxWidth="lg" sx={{ my: 8 }}>
-        <Typography variant="h4" component="h2" textAlign="center" gutterBottom fontWeight="bold">
-          Why Choose HealthChat AI?
-        </Typography>
-        <Grid container spacing={4} sx={{ mt: 4 }}>
-          <Grid item xs={12} md={4}>
-            <Feature
-              icon={<ChatIcon sx={{ fontSize: 40, color: 'primary.main' }} />}
-              title="Instant Responses"
-              description="Get quick and accurate answers to your health questions anytime, anywhere."
-            />
-          </Grid>
-          <Grid item xs={12} md={4}>
-            <Feature
-              icon={<SecurityIcon sx={{ fontSize: 40, color: 'primary.main' }} />}
-              title="Privacy Focused"
-              description="Your health information is always kept confidential and secure."
-            />
-          </Grid>
-          <Grid item xs={12} md={4}>
-            <Feature
-              icon={<HistoryIcon sx={{ fontSize: 40, color: 'primary.main' }} />}
-              title="Personalized Experience"
-              description="Our AI learns from your interactions to provide tailored health advice."
-            />
-          </Grid>
-        </Grid>
-      </Container>
+      {/* Features Section */}
+      <Box sx={{
+        background: 'linear-gradient(135deg, #0a2463, #3e92cc)',
+        py: 12,
+        position: 'relative',
+        overflow: 'hidden',
+      }}>
+        <Container maxWidth="lg">
+          <Typography variant="h4" component="h2" textAlign="center" gutterBottom fontWeight="bold" sx={{ color: 'white', mb: 8 }}>
+            Why Choose HealthChat AI?
+          </Typography>
+          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 4, justifyContent: 'center' }}>
+            <Box sx={{ flex: '1 1 300px', maxWidth: '350px' }}>
+              <FeatureCard
+                icon={<ChatIcon sx={{ fontSize: 40, color: 'white' }} />}
+                title="Instant Responses"
+                description="Get quick and accurate answers to your health questions anytime, anywhere."
+                delay={0.2}
+              />
+            </Box>
+            <Box sx={{ flex: '1 1 300px', maxWidth: '350px' }}>
+              <FeatureCard
+                icon={<SecurityIcon sx={{ fontSize: 40, color: 'white' }} />}
+                title="Privacy Focused"
+                description={<>Your health information is always kept confidential and secure. We highly recommend not sharing any sensitive information as our products interact with model provider APIs. Learn more about sensitive information from <a href="https://www.ncbi.nlm.nih.gov/books/NBK236546/" style={{color: '#ffe66d'}}>NCBI</a>.</>}
+                delay={0.4}
+              />
+            </Box>
+            <Box sx={{ flex: '1 1 300px', maxWidth: '350px' }}>
+              <FeatureCard
+                icon={<HealthAndSafetyIcon sx={{ fontSize: 40, color: 'white' }} />}
+                title="Safe and Secure Models"
+                description="Our AI has learned from the best medical experts to provide safe and accurate health advice."
+                delay={0.6}
+              />
+            </Box>
+          </Box>
+        </Container>
+        <Box 
+          sx={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundImage: 'url("/images/dna-pattern.png")',
+            backgroundSize: '200px',
+            opacity: 0.05,
+            animation: 'move 30s linear infinite',
+            '@keyframes move': {
+              '0%': { backgroundPosition: '0 0' },
+              '100%': { backgroundPosition: '200px 200px' },
+            },
+          }}
+        />
+      </Box>
 
-      <Box sx={{ bgcolor: 'background.paper', py: 8 }}>
-        <Container maxWidth="md">
-          <Typography variant="h4" component="h2" textAlign="center" gutterBottom fontWeight="bold">
+      {/* Call to Action Section */}
+      <Box sx={{ 
+        position: 'relative',
+        overflow: 'hidden',
+        background: 'linear-gradient(135deg, #0a2463, #3e92cc)',
+        '&::before': {
+          content: '""',
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundImage: 'url("/images/dna-pattern.png")',
+          backgroundSize: '200px',
+          opacity: 0.05,
+          animation: 'move 30s linear infinite',
+        },
+        '@keyframes move': {
+          '0%': { backgroundPosition: '0 0' },
+          '100%': { backgroundPosition: '200px 200px' },
+        },
+      }}>
+        <Container maxWidth="md" sx={{ position: 'relative', zIndex: 2, py: 8 }}>
+          <Typography 
+            variant="h4" 
+            component="h2" 
+            textAlign="center" 
+            gutterBottom 
+            fontWeight="bold" 
+            sx={{
+              color: '#ffffff',
+              textShadow: '2px 2px 4px rgba(0,0,0,0.3)',
+            }}
+          >
             Ready to have the best health information at your fingertips?
           </Typography>
-          <Typography variant="body1" textAlign="center" paragraph>
+          <Typography 
+            variant="body1" 
+            textAlign="center" 
+            paragraph 
+            sx={{ 
+              color: '#e0e0e0',
+              fontSize: '1.1rem',
+              mb: 4,
+            }}
+          >
             Start chatting with HealthBot today.
           </Typography>
-          <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
-            <Button variant="contained" size="large" onClick={() => handleAuthOpen(false)} sx={{ mr: 2 }}>
+          <Box sx={{ 
+            display: 'flex', 
+            justifyContent: 'center', 
+            mt: 4,
+          }}>
+            <Button 
+              variant="contained" 
+              size="large" 
+              onClick={() => handleAuthOpen(false)} 
+              sx={{ 
+                mr: 2, 
+                bgcolor: '#ffe66d',
+                color: '#0a2463',
+                fontWeight: 'bold',
+                padding: '10px 24px',
+                fontSize: '1rem',
+                borderRadius: '30px',
+                boxShadow: '0 4px 14px rgba(255, 230, 109, 0.4)',
+                transition: 'all 0.3s ease',
+                '&:hover': {
+                  bgcolor: '#fff7aa',
+                  transform: 'translateY(-2px)',
+                  boxShadow: '0 6px 20px rgba(255, 230, 109, 0.6)',
+                },
+              }}
+            >
               Sign Up Now
             </Button>
-            <Button variant="outlined" size="large" onClick={() => handleAuthOpen(true)}>
+            <Button 
+              variant="outlined" 
+              size="large" 
+              onClick={() => handleAuthOpen(true)}
+              sx={{
+                borderColor: '#ffffff',
+                color: '#ffffff',
+                padding: '10px 24px',
+                fontSize: '1rem',
+                borderRadius: '30px',
+                borderWidth: '2px',
+                transition: 'all 0.3s ease',
+                '&:hover': {
+                  bgcolor: 'rgba(255,255,255,0.1)',
+                  borderColor: '#ffe66d',
+                  color: '#ffe66d',
+                },
+              }}
+            >
               Login
             </Button>
           </Box>
         </Container>
+        
+        {/* Decorative Elements */}
+        <Box 
+          component="img"
+          src="/images/health-bot-icon.png" 
+          alt="Health Bot Icon"
+          sx={{
+            position: 'absolute',
+            bottom: '-30px',
+            right: '-30px',
+            width: '200px',
+            height: '200px',
+            opacity: 0.15,
+            transform: 'rotate(-15deg)',
+          }}
+        />
+        {[...Array(15)].map((_, i) => (
+          <Box
+            key={i}
+            sx={{
+              position: 'absolute',
+              top: `${Math.random() * 100}%`,
+              left: `${Math.random() * 100}%`,
+              width: `${Math.random() * 8 + 4}px`,
+              height: `${Math.random() * 8 + 4}px`,
+              borderRadius: '50%',
+              backgroundColor: 'rgba(255,255,255,0.3)',
+              animation: `float ${Math.random() * 8 + 4}s infinite linear`,
+              '@keyframes float': {
+                '0%': { transform: 'translateY(0)' },
+                '50%': { transform: 'translateY(-15px)' },
+                '100%': { transform: 'translateY(0)' },
+              },
+            }}
+          />
+        ))}
       </Box>
 
       <Modal
@@ -196,8 +413,8 @@ export default function LandingPage() {
         </Box>
       </Modal>
 
-    {/* HealthBot PopupChat */}
-    {healthBotOpen && (
+      {/* HealthBot PopupChat */}
+      {healthBotOpen && (
         <PopupChat user={user} onClose={handleCloseHealthBot} />
       )}
 
