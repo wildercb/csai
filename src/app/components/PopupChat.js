@@ -70,7 +70,8 @@ const TypingIndicator = styled(Box)(({ theme }) => ({
 export default function PopupChat({ user, onClose }) {
   const [isOpen, setIsOpen] = useState(!!onClose);
   const [messages, setMessages] = useState([
-    { role: 'assistant', content: "Hello, how may I assist you today? I'm HealthBot, your personal health assistant with a wealth of medical knowledge!" }
+    { role: 'assistant', content: "Please be careful not to share any sensitive information. We are happy to provide you to instant access to the best health information and advise to consult a doctor for serious issues." },
+    { role: 'assistant', content: "Hello, how may we assist you today?" }
   ]);
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
