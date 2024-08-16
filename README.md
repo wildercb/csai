@@ -3,12 +3,11 @@
 First, run the development server:
 
 <pre style="background-color: black; color: white;">
-```bash
+
 npm install
 npm run dev
 # or
 yarn dev /pnpm dev /bun dev
-```
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 </pre>
