@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useState } from 'react';
+import { keyframes } from '@emotion/react';
 import { Button, Typography, Box, Container, AppBar, Toolbar, Modal, useTheme, useMediaQuery } from '@mui/material';
 import ChatIcon from '@mui/icons-material/Chat';
 import SecurityIcon from '@mui/icons-material/Security';
@@ -97,14 +98,14 @@ export default function LandingPage() {
   return (
     <ThemeProvider theme={theme}>
       <Box sx={{ fontFamily: 'var(--font-nunito), Arial, sans-serif' }}>
-        <AppBar position="fixed" color="transparent" elevation={0} sx={{ backdropFilter: 'blur(10px)' }}>
+        <AppBar position="fixed" color = "transparent" elevation={0} sx={{ backgroundColor: "transparent" }}>
           <Toolbar>
             <HealthAndSafetyIcon sx={{ mr: 2, color: 'primary.main' }} />
-            <Typography variant="h6" component="div" sx={{ flexGrow: 1, fontWeight: 'bold', color: 'primary.main' }}>
+            <Typography variant="h6" component="div" sx={{ flexGrow: 1, fontWeight: 'bold', color: 'white' }}>
               HealthChat AI
             </Typography>
-            <Button color="primary" onClick={() => handleAuthOpen(true)} sx={{ mr: 1 }}>Login</Button>
-            <Button color="primary" variant="contained" onClick={() => handleAuthOpen(false)}>Sign Up</Button>
+            <Button color="inherit" variant= "contained" onClick={() => handleAuthOpen(true)} sx={{ mr: 1 }}>Login</Button>
+            <Button color="inherit" variant="contained" onClick={() => handleAuthOpen(false)}>Sign Up</Button>
           </Toolbar>
         </AppBar>
 
