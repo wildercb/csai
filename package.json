@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "node -r dotenv/config next build",
+    "build": "next build",
     "start": "next start",
     "lint": "next lint",
     "upload-to-pinecone": "node -r dotenv/config scripts/uploadToPinecone.js"
