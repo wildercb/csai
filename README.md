@@ -57,12 +57,34 @@ MedServe is an advanced health assistant application designed to provide users w
 
 MedServe AI follows a modern, serverless architecture leveraging cloud services for scalability and maintainability.
 
-### High-Level Architecture Diagram:
-[User] <-> [Next.js Frontend] <-> [API Routes] <-> [LLM Provider's API]
-^
-|
-v
-[Firebase Auth] <-> [Firebase Firestore] <-> [Pinecone Vector DB]
+## High-Level Architecture Diagram
+
+```mermaid
+graph TD
+    User[User] -->|HTTPS| Frontend[Next.js Frontend]
+    subgraph Frontend
+        Landing[Landing Page]
+        Chat[Chat Interface]
+    end
+    Frontend -->|API Calls| Routes[API Routes]
+    subgraph Routes
+        ChatProcess[Chat Processing]
+        UserAuth[User Auth]
+        VectorSearch[Vector Search]
+    end
+    ChatProcess -->|NLP Requests| LLMAPI[LLM API]
+    UserAuth -->|Authenticate| FireAuth[Firebase Auth]
+    VectorSearch -->|Query| PineconeAPI[Pinecone API]
+    FireAuth --> Firestore[Firebase Firestore]
+    PineconeAPI --> Firestore
+    
+    classDef frontend fill:#d0e0ff,stroke:#333,stroke-width:2px;
+    classDef backend fill:#ffe0d0,stroke:#333,stroke-width:2px;
+    classDef external fill:#d0ffe0,stroke:#333,stroke-width:2px;
+    
+    class Frontend frontend;
+    class Routes backend;
+    class LLMAPI,FireAuth,PineconeAPI,Firestore external;
 
 ### Components:
 1. **Next.js Frontend**: Serves the user interface and handles client-side logic.
