@@ -84,7 +84,7 @@ graph TD
     
     class Frontend frontend;
     class Routes backend;
-    class LLMAPI,FireAuth,PineconeAPI,Firestore external;```
+    class LLMAPI,FireAuth,PineconeAPI,Firestore external;
 
 ### Components:
 1. **Next.js Frontend**: Serves the user interface and handles client-side logic.
