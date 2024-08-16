@@ -1,11 +1,11 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { 
   Box, TextField, Button, Typography, CircularProgress, Paper, Avatar,
-  IconButton, Tooltip, Divider, useTheme
+  IconButton, Tooltip, Divider, useTheme, Chip
 } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import SendIcon from '@mui/icons-material/Send';
-import SmartToyIcon from '@mui/icons-material/SmartToy';
+import LocalHospitalIcon from '@mui/icons-material/LocalHospital';
 import PersonIcon from '@mui/icons-material/Person';
 import AttachFileIcon from '@mui/icons-material/AttachFile';
 import MicIcon from '@mui/icons-material/Mic';
@@ -17,12 +17,13 @@ const MessageBubble = styled(Paper)(({ theme, isUser }) => ({
   backgroundColor: isUser ? theme.palette.primary.light : theme.palette.background.paper,
   borderRadius: isUser ? '20px 20px 0 20px' : '20px 20px 20px 0',
   boxShadow: theme.shadows[1],
+  border: isUser ? 'none' : `1px solid ${theme.palette.divider}`,
 }));
 
 const MessageAvatar = styled(Avatar)(({ theme, isUser }) => ({
   backgroundColor: isUser ? theme.palette.primary.main : theme.palette.secondary.main,
-  width: 28,
-  height: 28,
+  width: 32,
+  height: 32,
   marginRight: theme.spacing(1),
 }));
 
@@ -36,7 +37,7 @@ const InputArea = styled(Box)(({ theme }) => ({
 
 export default function ChatComponent({ chatId, user }) {
   const [messages, setMessages] = useState([
-    { role: 'assistant', content: "Hello! I'm your Med-friend assistant. How can I help you with your health questions today?" }
+    { role: 'assistant', content: "Hello! I'm your HealthChat AI assistant. How can I help you with your health questions today?" }
   ]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -68,7 +69,10 @@ export default function ChatComponent({ chatId, user }) {
       setMessages(prev => [...prev, data.choices[0].message]);
     } catch (error) {
       console.error('Error:', error);
-      setMessages(prev => [...prev, { role: 'assistant', content: "I'm sorry, I'm having trouble responding right now. Please try again later or contact support if the issue persists." }]);
+      setMessages(prev => [...prev, { 
+        role: 'assistant', 
+        content: "I apologize, but I'm experiencing technical difficulties at the moment. Please try again later or contact our support team if the issue persists. Remember, for any urgent medical concerns, please consult with a healthcare professional directly." 
+      }]);
     } finally {
       setIsLoading(false);
     }
@@ -82,11 +86,19 @@ export default function ChatComponent({ chatId, user }) {
             <MessageBubble isUser={msg.role === 'user'}>
               <Box display="flex" alignItems="center" mb={1}>
                 <MessageAvatar isUser={msg.role === 'user'}>
-                  {msg.role === 'user' ? <PersonIcon fontSize="small" /> : <SmartToyIcon fontSize="small" />}
+                  {msg.role === 'user' ? <PersonIcon /> : <LocalHospitalIcon />}
                 </MessageAvatar>
                 <Typography variant="subtitle2" fontWeight="bold" color={msg.role === 'user' ? 'primary' : 'secondary'}>
-                  {msg.role === 'user' ? 'You' : 'Med-friend'}
+                  {msg.role === 'user' ? 'You' : 'HealthChat AI'}
                 </Typography>
+                {msg.role === 'assistant' && (
+                  <Chip
+                    label="AI"
+                    size="small"
+                    color="secondary"
+                    sx={{ ml: 1, height: 20, fontSize: '0.7rem' }}
+                  />
+                )}
               </Box>
               <Typography variant="body1">{msg.content}</Typography>
             </MessageBubble>
@@ -97,15 +109,21 @@ export default function ChatComponent({ chatId, user }) {
             <MessageBubble>
               <Box display="flex" alignItems="center">
                 <MessageAvatar>
-                  <SmartToyIcon fontSize="small" />
+                  <LocalHospitalIcon />
                 </MessageAvatar>
                 <Typography variant="subtitle2" fontWeight="bold" color="secondary">
-                  Med-friend
+                  HealthChat AI
                 </Typography>
+                <Chip
+                  label="AI"
+                  size="small"
+                  color="secondary"
+                  sx={{ ml: 1, height: 20, fontSize: '0.7rem' }}
+                />
               </Box>
               <Box sx={{ display: 'flex', alignItems: 'center', mt: 1 }}>
                 <CircularProgress size={20} sx={{ mr: 1 }} color="secondary" />
-                <Typography variant="body2">Thinking...</Typography>
+                <Typography variant="body2">Analyzing your query...</Typography>
               </Box>
             </MessageBubble>
           </Box>
@@ -114,7 +132,7 @@ export default function ChatComponent({ chatId, user }) {
       </Box>
       <Divider />
       <InputArea>
-        <Tooltip title="Attach file">
+        <Tooltip title="Attach medical records">
           <IconButton color="primary" sx={{ mr: 1 }}>
             <AttachFileIcon />
           </IconButton>
@@ -122,7 +140,7 @@ export default function ChatComponent({ chatId, user }) {
         <TextField
           fullWidth
           variant="outlined"
-          placeholder="Type your health question..."
+          placeholder="Describe your symptoms or ask a health question..."
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyPress={(e) => e.key === 'Enter' && !e.shiftKey && handleSend()}

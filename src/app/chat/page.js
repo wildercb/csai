@@ -4,19 +4,24 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { 
   Box, List, ListItem, ListItemText, Typography, Button, AppBar, Toolbar, 
-  IconButton, Avatar, Tooltip, Drawer, useMediaQuery, Divider, TextField
+  IconButton, Avatar, Tooltip, useMediaQuery, Divider, TextField,
+  Chip, Menu, MenuItem, ListItemIcon, CircularProgress
 } from '@mui/material';
 import { ThemeProvider, createTheme, styled } from '@mui/material/styles';
 import { auth, db } from '../utils/firebase';
-import { collection, query, where, orderBy, onSnapshot, addDoc, serverTimestamp, updateDoc, doc } from 'firebase/firestore';
+import { collection, query, where, orderBy, onSnapshot, addDoc, serverTimestamp, updateDoc, doc, deleteDoc } from 'firebase/firestore';
 import ChatComponent from '../components/Chat';
 import AddIcon from '@mui/icons-material/Add';
 import ExitToAppIcon from '@mui/icons-material/ExitToApp';
-import MedicalServicesIcon from '@mui/icons-material/MedicalServices';
+import LocalHospitalIcon from '@mui/icons-material/LocalHospital';
 import InfoIcon from '@mui/icons-material/Info';
-import MenuIcon from '@mui/icons-material/Menu';
-import CloseIcon from '@mui/icons-material/Close';
 import SearchIcon from '@mui/icons-material/Search';
+import DeleteIcon from '@mui/icons-material/Delete';
+import EditIcon from '@mui/icons-material/Edit';
+import ArchiveIcon from '@mui/icons-material/Archive';
+import SettingsIcon from '@mui/icons-material/Settings';
+import HelpIcon from '@mui/icons-material/Help';
+import MoreVertIcon from '@mui/icons-material/MoreVert';
 
 const theme = createTheme({
   typography: {
@@ -24,17 +29,17 @@ const theme = createTheme({
   },
   palette: {
     primary: {
-      main: '#4caf50',
-      light: '#81c784',
-      dark: '#388e3c',
+      main: '#1976d2', // Medical blue
+      light: '#63a4ff',
+      dark: '#004ba0',
     },
     secondary: {
-      main: '#ff7043',
-      light: '#ff9e80',
-      dark: '#f4511e',
+      main: '#388e3c', // Healing green
+      light: '#6abf69',
+      dark: '#00600f',
     },
     background: {
-      default: '#f0f4f8',
+      default: '#f5f5f5',
       paper: '#ffffff',
     },
   },
@@ -58,7 +63,7 @@ const theme = createTheme({
     MuiAppBar: {
       styleOverrides: {
         root: {
-          backgroundColor: '#4caf50',
+          backgroundColor: '#1976d2',
         },
       },
     },
@@ -76,49 +81,48 @@ const ChatListContainer = styled(Box)(({ theme }) => ({
   backgroundColor: theme.palette.background.paper,
   overflowY: 'auto',
   height: '100%',
-}));
-
-const ChatListItem = styled(ListItem)(({ theme }) => ({
-  borderRadius: theme.shape.borderRadius,
-  margin: '4px 8px',
-  '&.Mui-selected': {
-    backgroundColor: theme.palette.action.selected,
-  },
-  '&:hover': {
-    backgroundColor: theme.palette.action.hover,
+  [theme.breakpoints.down('md')]: {
+    width: '100%',
+    height: 'auto',
+    maxHeight: '300px',
+    borderRight: 'none',
+    borderTop: `1px solid ${theme.palette.divider}`,
   },
 }));
 
-const MainContent = styled(Box)({
+const MainContent = styled(Box)(({ theme }) => ({
   flexGrow: 1,
   display: 'flex',
   flexDirection: 'column',
   height: '100%',
   backgroundColor: '#f5f5f5',
-});
+  [theme.breakpoints.down('md')]: {
+    height: 'calc(100% - 300px)', // Adjust this value based on your ChatListContainer height
+  },
+}));
 
 const DisclaimerBox = styled(Box)(({ theme }) => ({
   backgroundColor: theme.palette.warning.light,
   padding: theme.spacing(2),
   marginBottom: theme.spacing(2),
   borderRadius: theme.shape.borderRadius,
+  border: `1px solid ${theme.palette.warning.main}`,
 }));
 
 export default function ChatPage() {
   const [user, setUser] = useState(null);
   const [chats, setChats] = useState([]);
   const [selectedChat, setSelectedChat] = useState(null);
-  const [drawerOpen, setDrawerOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
+  const [anchorEl, setAnchorEl] = useState(null);
+  const [selectedChatForMenu, setSelectedChatForMenu] = useState(null);
   const router = useRouter();
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  const isLargeScreen = useMediaQuery(theme.breakpoints.up('md'));
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((user) => {
-      setUser(user);
-      if (!user) {
-        router.push('/');
-      } else {
+      if (user) {
+        setUser(user);
         const chatsQuery = query(
           collection(db, 'chats'),
           where('userId', '==', user.uid),
@@ -137,39 +141,68 @@ export default function ChatPage() {
         });
 
         return () => chatsUnsubscribe();
+      } else {
+        router.push('/');
       }
     });
 
     return () => unsubscribe();
-  }, [router]);
-
-  const startNewChat = async () => {
-    try {
-      const newChatRef = await addDoc(collection(db, 'chats'), {
-        userId: user.uid,
-        createdAt: serverTimestamp(),
-        title: 'New Chat'
-      });
-      setSelectedChat(newChatRef.id);
-      if (isMobile) {
-        setDrawerOpen(false);
-      }
-    } catch (error) {
-      console.error('Error creating new chat:', error);
-    }
-  };
+  }, [router, selectedChat]);
 
   const handleLogout = async () => {
     try {
       await auth.signOut();
       router.push('/');
     } catch (error) {
-      console.error('Error signing out:', error);
+      console.error('Failed to log out', error);
     }
   };
 
-  const toggleDrawer = () => {
-    setDrawerOpen(!drawerOpen);
+  const startNewChat = async () => {
+    try {
+      const newChatRef = await addDoc(collection(db, 'chats'), {
+        userId: user.uid,
+        createdAt: serverTimestamp(),
+        title: 'New Consultation'
+      });
+      setSelectedChat(newChatRef.id);
+    } catch (error) {
+      console.error('Failed to start new chat', error);
+    }
+  };
+
+  const handleChatMenuOpen = (event, chatId) => {
+    setAnchorEl(event.currentTarget);
+    setSelectedChatForMenu(chatId);
+  };
+
+  const handleChatMenuClose = () => {
+    setAnchorEl(null);
+    setSelectedChatForMenu(null);
+  };
+
+  const handleDeleteChat = async () => {
+    if (selectedChatForMenu) {
+      try {
+        await deleteDoc(doc(db, 'chats', selectedChatForMenu));
+        if (selectedChat === selectedChatForMenu) {
+          setSelectedChat(chats.length > 1 ? chats[0].id : null);
+        }
+      } catch (error) {
+        console.error('Failed to delete chat', error);
+      }
+    }
+    handleChatMenuClose();
+  };
+
+  const handleRenameChat = () => {
+    // Implement rename functionality
+    handleChatMenuClose();
+  };
+
+  const handleArchiveChat = () => {
+    // Implement archive functionality
+    handleChatMenuClose();
   };
 
   const filteredChats = chats.filter(chat => 
@@ -179,17 +212,15 @@ export default function ChatPage() {
   const chatList = (
     <ChatListContainer>
       <Box p={2}>
-        <Typography variant="h6" gutterBottom>Saved Messages</Typography>
         <TextField
           fullWidth
           variant="outlined"
-          placeholder="Search chats..."
+          placeholder="Search consultations..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           InputProps={{
             startAdornment: <SearchIcon color="action" />,
           }}
-          sx={{ mb: 2 }}
         />
         <Button
           fullWidth
@@ -197,31 +228,31 @@ export default function ChatPage() {
           color="primary"
           startIcon={<AddIcon />}
           onClick={startNewChat}
-          sx={{ mb: 2 }}
+          sx={{ mt: 2 }}
         >
-          New Chat
+          New Consultation
         </Button>
       </Box>
       <Divider />
       <List>
         {filteredChats.map((chat) => (
-          <ChatListItem
+          <ListItem
             key={chat.id}
             button
-            onClick={() => {
-              setSelectedChat(chat.id);
-              if (isMobile) setDrawerOpen(false);
-            }}
+            onClick={() => setSelectedChat(chat.id)}
             selected={selectedChat === chat.id}
           >
             <Avatar sx={{ mr: 2, bgcolor: 'secondary.main' }}>
-              {chat.title ? chat.title[0].toUpperCase() : 'C'}
+              <LocalHospitalIcon />
             </Avatar>
             <ListItemText
-              primary={chat.title || 'Untitled Chat'}
+              primary={chat.title}
               secondary={chat.createdAt ? new Date(chat.createdAt.toDate()).toLocaleString() : 'Just now'}
             />
-          </ChatListItem>
+            <IconButton edge="end" onClick={(event) => handleChatMenuOpen(event, chat.id)}>
+              <MoreVertIcon />
+            </IconButton>
+          </ListItem>
         ))}
       </List>
     </ChatListContainer>
@@ -230,7 +261,7 @@ export default function ChatPage() {
   if (!user) {
     return (
       <Box display="flex" justifyContent="center" alignItems="center" height="100vh">
-        <Typography variant="h5">Loading...</Typography>
+        <CircularProgress />
       </Box>
     );
   }
@@ -240,22 +271,27 @@ export default function ChatPage() {
       <Box display="flex" flexDirection="column" height="100vh" sx={{ fontFamily: 'var(--font-nunito), Arial, sans-serif' }}>
         <StyledAppBar position="static">
           <Toolbar>
-            {isMobile && (
-              <IconButton edge="start" color="inherit" onClick={toggleDrawer} sx={{ mr: 2 }}>
-                <MenuIcon />
-              </IconButton>
-            )}
-            <MedicalServicesIcon sx={{ mr: 2 }} />
-            <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-              Med-friend Assistant
+            <LocalHospitalIcon sx={{ mr: 2 }} />
+            <Typography variant="h6" component="div" sx={{ flexGrow: 1, fontWeight: 'bold' }}>
+              HealthChat AI
             </Typography>
-            {!isMobile && (
-              <Tooltip title="Start a new chat">
+            {!isLargeScreen && (
+              <Tooltip title="Start a new consultation">
                 <IconButton color="inherit" onClick={startNewChat}>
                   <AddIcon />
                 </IconButton>
               </Tooltip>
             )}
+            <Tooltip title="Settings">
+              <IconButton color="inherit">
+                <SettingsIcon />
+              </IconButton>
+            </Tooltip>
+            <Tooltip title="Help">
+              <IconButton color="inherit">
+                <HelpIcon />
+              </IconButton>
+            </Tooltip>
             <Tooltip title="Log out">
               <IconButton color="inherit" onClick={handleLogout}>
                 <ExitToAppIcon />
@@ -263,37 +299,44 @@ export default function ChatPage() {
             </Tooltip>
           </Toolbar>
         </StyledAppBar>
-        <Box display="flex" flexGrow={1}>
-          {!isMobile && chatList}
+        <Box display="flex" flexDirection={isLargeScreen ? 'row' : 'column'} flexGrow={1}>
+          {isLargeScreen && chatList}
           <MainContent>
             <DisclaimerBox>
               <Typography variant="body2" color="text.secondary">
-                <InfoIcon sx={{ verticalAlign: 'middle', mr: 1 }} />
-                Disclaimer: This AI assistant provides general health information and is not a substitute for professional medical advice, diagnosis, or treatment. Always consult with a qualified healthcare provider for medical concerns.
+                <InfoIcon sx={{ verticalAlign: 'middle', mr: 1, color: theme.palette.warning.dark }} />
+                Medical Disclaimer: The information provided by HealthChat AI is for general informational purposes only and is not a substitute for professional medical advice, diagnosis, or treatment. Always seek the advice of your physician or other qualified health provider with any questions you may have regarding a medical condition.
               </Typography>
             </DisclaimerBox>
             <ChatComponent chatId={selectedChat} user={user} />
           </MainContent>
+          {!isLargeScreen && chatList}
         </Box>
       </Box>
-      <Drawer
-        anchor="left"
-        open={isMobile && drawerOpen}
-        onClose={toggleDrawer}
-        sx={{
-          '& .MuiDrawer-paper': {
-            width: '80%',
-            maxWidth: 300,
-          },
-        }}
+      <Menu
+        anchorEl={anchorEl}
+        open={Boolean(anchorEl)}
+        onClose={handleChatMenuClose}
       >
-        <Box sx={{ display: 'flex', justifyContent: 'flex-end', p: 1 }}>
-          <IconButton onClick={toggleDrawer}>
-            <CloseIcon />
-          </IconButton>
-        </Box>
-        {chatList}
-      </Drawer>
+        <MenuItem onClick={handleRenameChat}>
+          <ListItemIcon>
+            <EditIcon fontSize="small" />
+          </ListItemIcon>
+          Rename
+        </MenuItem>
+        <MenuItem onClick={handleArchiveChat}>
+          <ListItemIcon>
+            <ArchiveIcon fontSize="small" />
+          </ListItemIcon>
+          Archive
+        </MenuItem>
+        <MenuItem onClick={handleDeleteChat}>
+          <ListItemIcon>
+            <DeleteIcon fontSize="small" />
+          </ListItemIcon>
+          Delete
+        </MenuItem>
+      </Menu>
     </ThemeProvider>
   );
 }

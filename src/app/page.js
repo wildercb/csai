@@ -192,7 +192,7 @@ export default function LandingPage() {
                   },
                 }}
               >
-                Chat with Med-Friend
+                Try Med-Friend
               </Button>
               <Button
                 variant="outlined"
@@ -210,7 +210,7 @@ export default function LandingPage() {
                   },
                 }}
               >
-                Enter Chat Room
+                Enter Chat 
               </Button>
             </Box>
           </Container>  
