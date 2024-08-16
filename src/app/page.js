@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { Button, Typography, Box, Container, AppBar, Toolbar, Modal, useTheme, useMediaQuery } from '@mui/material';
 import ChatIcon from '@mui/icons-material/Chat';
 import SecurityIcon from '@mui/icons-material/Security';
-import HealthAndSafetyIcon from '@mui/icons-material/HealthAndSafety';
+import FavoriteIcon from '@mui/icons-material/Favorite';
 import Auth from './components/Auth';
 import PopupChat from './components/PopupChat';
 import { auth } from './utils/firebase';
@@ -14,6 +14,14 @@ import { ThemeProvider, createTheme } from '@mui/material/styles';
 const theme = createTheme({
   typography: {
     fontFamily: 'var(--font-nunito), Arial, sans-serif',
+  },
+  palette: {
+    primary: {
+      main: '#4caf50', // A friendlier green color
+    },
+    secondary: {
+      main: '#ff7043', // A warm orange color
+    },
   },
   components: {
     MuiTypography: {
@@ -27,6 +35,7 @@ const theme = createTheme({
       styleOverrides: {
         root: {
           fontFamily: 'var(--font-nunito), Arial, sans-serif',
+          borderRadius: '25px',
         },
       },
     },
@@ -36,7 +45,7 @@ const theme = createTheme({
 const FeatureCard = ({ icon, title, description }) => (
   <Box
     sx={{
-      backgroundColor: 'rgba(255, 255, 255, 0.1)',
+      backgroundColor: 'rgba(255, 255, 255, 0.9)',
       borderRadius: '20px',
       padding: '2rem',
       height: '100%',
@@ -60,10 +69,10 @@ const FeatureCard = ({ icon, title, description }) => (
     >
       {icon}
     </Box>
-    <Typography variant="h6" component="h3" sx={{ mb: 2, color: 'white', textAlign: 'center' }}>
+    <Typography variant="h6" component="h3" sx={{ mb: 2, color: 'primary.main', textAlign: 'center' }}>
       {title}
     </Typography>
-    <Typography variant="body2" sx={{ color: 'rgba(255, 255, 255, 0.8)', textAlign: 'center', flexGrow: 1 }}>
+    <Typography variant="body2" sx={{ color: 'text.secondary', textAlign: 'center', flexGrow: 1 }}>
       {description}
     </Typography>
   </Box>
@@ -72,7 +81,7 @@ const FeatureCard = ({ icon, title, description }) => (
 export default function LandingPage() {
   const [authOpen, setAuthOpen] = useState(false);
   const [isLogin, setIsLogin] = useState(true);
-  const [healthBotOpen, setHealthBotOpen] = useState(false);
+  const [medFriendOpen, setMedFriendOpen] = useState(false);
   const [user, setUser] = useState(null);
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const router = useRouter();
@@ -83,8 +92,8 @@ export default function LandingPage() {
   };
 
   const handleAuthClose = () => setAuthOpen(false);
-  const handleTryHealthBot = () => setHealthBotOpen(true);
-  const handleCloseHealthBot = () => setHealthBotOpen(false);
+  const handleTryMedFriend = () => setMedFriendOpen(true);
+  const handleCloseMedFriend = () => setMedFriendOpen(false);
 
   const handleEnterChatRoom = () => {
     if (user) {
@@ -99,9 +108,9 @@ export default function LandingPage() {
       <Box sx={{ fontFamily: 'var(--font-nunito), Arial, sans-serif' }}>
         <AppBar position="fixed" color="transparent" elevation={0} sx={{ backdropFilter: 'blur(10px)' }}>
           <Toolbar>
-            <HealthAndSafetyIcon sx={{ mr: 2, color: 'primary.main' }} />
+            <FavoriteIcon sx={{ mr: 2, color: 'primary.main' }} />
             <Typography variant="h6" component="div" sx={{ flexGrow: 1, fontWeight: 'bold', color: 'primary.main' }}>
-              HealthChat AI
+              Med-Friend
             </Typography>
             <Button color="primary" onClick={() => handleAuthOpen(true)} sx={{ mr: 1 }}>Login</Button>
             <Button color="primary" variant="contained" onClick={() => handleAuthOpen(false)}>Sign Up</Button>
@@ -110,7 +119,7 @@ export default function LandingPage() {
 
         <Box
           sx={{
-            backgroundImage: 'url("/images/Health_background_1.png")',
+            backgroundImage: 'url("/images/Health_friend.png")',
             backgroundSize: 'cover',
             backgroundPosition: 'center',
             minHeight: '100vh',
@@ -128,7 +137,7 @@ export default function LandingPage() {
               left: 0,
               right: 0,
               bottom: 0,
-              backgroundColor: 'rgba(0, 0, 0, 0.5)',
+              backgroundColor: 'rgba(0, 0, 0, 0.4)',
               zIndex: -1,
             },
           }}
@@ -136,13 +145,12 @@ export default function LandingPage() {
           <Container maxWidth="md" sx={{ 
             position: 'relative', 
             zIndex: 2, 
-            backgroundColor: 'rgba(255, 255, 255, 0.1)',
+            backgroundColor: 'rgba(255, 255, 255, 0.9)',
             backdropFilter: 'blur(10px)',
             borderRadius: '20px',
             padding: '3rem 2rem',
             boxShadow: '0 4px 30px rgba(0, 0, 0, 0.1)',
             border: '1px solid rgba(255, 255, 255, 0.2)',
-            background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05))',
           }}>
             <Typography 
               variant={isMobile ? 'h3' : 'h2'} 
@@ -150,41 +158,41 @@ export default function LandingPage() {
               gutterBottom 
               fontWeight="bold"
               sx={{
-                color: '#ffffff',
-                textShadow: '2px 2px 4px rgba(0, 0, 0, 0.3)',
+                color: 'primary.main',
+                textShadow: '1px 1px 2px rgba(0, 0, 0, 0.1)',
               }}
             >
-              Your Personal Health Assistant
+              Your Friendly Health Companion
             </Typography>
             <Typography 
               variant="h5" 
               component="h2" 
               gutterBottom
               sx={{
-                color: 'rgba(255, 255, 255, 0.9)',
+                color: 'text.primary',
                 mb: 4,
               }}
             >
-              Get instant answers to your health questions
+              Get caring, reliable health advice anytime, anywhere
             </Typography>
             <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4, gap: 2 }}>
               <Button
                 variant="contained"
                 size="large"
                 startIcon={<ChatIcon />}
-                onClick={handleTryHealthBot}
+                onClick={handleTryMedFriend}
                 sx={{ 
                   fontSize: '1.2rem', 
                   py: 1.5, 
                   px: 4,
-                  backgroundColor: '#ffe66d',
-                  color: '#333',
+                  backgroundColor: theme.palette.secondary.main,
+                  color: 'white',
                   '&:hover': {
-                    backgroundColor: '#fff7aa',
+                    backgroundColor: theme.palette.secondary.dark,
                   },
                 }}
               >
-                Try HealthBot
+                Chat with Med-Friend
               </Button>
               <Button
                 variant="outlined"
@@ -194,95 +202,63 @@ export default function LandingPage() {
                   fontSize: '1.2rem', 
                   py: 1.5, 
                   px: 4, 
-                  color: 'white', 
-                  borderColor: 'white',
+                  color: 'primary.main', 
+                  borderColor: 'primary.main',
                   '&:hover': {
-                    borderColor: '#ffe66d',
-                    color: '#ffe66d',
+                    borderColor: 'primary.dark',
+                    color: 'primary.dark',
                   },
                 }}
               >
-                Enter Chat
+                Enter Chat Room
               </Button>
             </Box>
           </Container>  
         </Box>
 
         <Box sx={{
-          background: 'linear-gradient(135deg, #0a2463, #3e92cc)',
+          background: 'linear-gradient(135deg, #e8f5e9, #c8e6c9)',
           py: 12,
           position: 'relative',
           overflow: 'hidden',
         }}>
           <Container maxWidth="lg">
-            <Typography variant="h4" component="h2" textAlign="center" gutterBottom fontWeight="bold" sx={{ color: 'white', mb: 8 }}>
-              Why Choose HealthChat AI?
+            <Typography variant="h4" component="h2" textAlign="center" gutterBottom fontWeight="bold" sx={{ color: 'primary.main', mb: 8 }}>
+              Why Choose Med-Friend?
             </Typography>
             <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 4, justifyContent: 'center' }}>
               <Box sx={{ flex: '1 1 300px', maxWidth: '350px' }}>
                 <FeatureCard
                   icon={<ChatIcon sx={{ fontSize: 40, color: 'white' }} />}
-                  title="Instant Responses"
-                  description="Get quick and accurate answers to your health questions anytime, anywhere."
+                  title="Friendly Conversations"
+                  description="Engage in warm, understanding chats about your health concerns with our AI companion."
                 />
               </Box>
               <Box sx={{ flex: '1 1 300px', maxWidth: '350px' }}>
                 <FeatureCard
                   icon={<SecurityIcon sx={{ fontSize: 40, color: 'white' }} />}
-                  title="Privacy Focused"
-                  description={<>Your health information is always kept confidential and secure. We highly recommend not sharing any sensitive information as our products interact with model provider APIs. Learn more about sensitive information from <a href="https://www.ncbi.nlm.nih.gov/books/NBK236546/" style={{color: '#ffe66d'}}>NCBI</a>.</>}
+                  title="Safe and Confidential"
+                  description={<>Your privacy is our priority. All conversations are secure and anonymous. Learn more about our privacy practices from <a href="https://www.hhs.gov/hipaa/index.html" style={{color: theme.palette.secondary.main}}>HHS</a>.</>}
                 />
               </Box>
               <Box sx={{ flex: '1 1 300px', maxWidth: '350px' }}>
                 <FeatureCard
-                  icon={<HealthAndSafetyIcon sx={{ fontSize: 40, color: 'white' }} />}
-                  title="Safe and Secure Models"
-                  description="Our AI has learned from the best medical experts to provide safe and accurate health advice."
+                  icon={<FavoriteIcon sx={{ fontSize: 40, color: 'white' }} />}
+                  title="Reliable Health Guidance"
+                  description="Our AI is trained on trusted medical resources to provide accurate and helpful health information."
                 />
               </Box>
             </Box>
           </Container>
-          <Box 
-            sx={{
-              position: 'absolute',
-              top: 0,
-              left: 0,
-              right: 0,
-              bottom: 0,
-              backgroundImage: 'url("/images/dna-pattern.png")',
-              backgroundSize: '200px',
-              opacity: 0.05,
-              animation: 'move 30s linear infinite',
-              '@keyframes move': {
-                '0%': { backgroundPosition: '0 0' },
-                '100%': { backgroundPosition: '200px 200px' },
-              },
-            }}
-          />
         </Box>
 
         <Box sx={{ 
           position: 'relative',
           overflow: 'hidden',
-          background: 'linear-gradient(135deg, #0a2463 0%, #000000 100%)',
-          '&::before': {
-            content: '""',
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            backgroundImage: 'radial-gradient(white, rgba(255,255,255,.2) 2px, transparent 40px), radial-gradient(white, rgba(255,255,255,.15) 1px, transparent 30px), radial-gradient(white, rgba(255,255,255,.1) 2px, transparent 40px), radial-gradient(rgba(255,255,255,.4), rgba(255,255,255,.1) 2px, transparent 30px)',
-            backgroundSize: '550px 550px, 350px 350px, 250px 250px, 150px 150px',
-            backgroundPosition: '0 0, 40px 60px, 130px 270px, 70px 100px',
-            animation: 'twinkle 10s infinite linear',
-          },
-          '@keyframes twinkle': {
-            '0%': { backgroundPosition: '0 0, 40px 60px, 130px 270px, 70px 100px' },
-            '100%': { backgroundPosition: '0 -550px, 40px -490px, 130px -280px, 70px -450px' },
-          },
+          background: 'linear-gradient(135deg, #81c784 0%, #4caf50 100%)',
+          py: 8,
         }}>
-          <Container maxWidth="md" sx={{ position: 'relative', zIndex: 2, py: 8 }}>
+          <Container maxWidth="md" sx={{ position: 'relative', zIndex: 2 }}>
             <Typography 
               variant="h4" 
               component="h2" 
@@ -291,22 +267,22 @@ export default function LandingPage() {
               fontWeight="bold" 
               sx={{
                 color: '#ffffff',
-                textShadow: '2px 2px 4px rgba(0,0,0,0.3)',
+                textShadow: '1px 1px 2px rgba(0,0,0,0.2)',
               }}
             >
-              Ready to have the best health information at your fingertips?
+              Ready for a Friendly Chat About Your Health?
             </Typography>
             <Typography 
               variant="body1" 
               textAlign="center" 
               paragraph 
               sx={{ 
-                color: '#e0e0e0',
+                color: '#ffffff',
                 fontSize: '1.1rem',
                 mb: 4,
               }}
             >
-              Start chatting with HealthBot today.
+              Med-Friend is here to listen, understand, and guide you towards better health.
             </Typography>
             <Box sx={{ 
               display: 'flex', 
@@ -319,22 +295,22 @@ export default function LandingPage() {
                 onClick={() => handleAuthOpen(false)} 
                 sx={{ 
                   mr: 2, 
-                  bgcolor: '#ffe66d',
-                  color: '#0a2463',
+                  bgcolor: '#ffffff',
+                  color: 'primary.main',
                   fontWeight: 'bold',
                   padding: '10px 24px',
                   fontSize: '1rem',
                   borderRadius: '30px',
-                  boxShadow: '0 4px 14px rgba(255, 230, 109, 0.4)',
+                  boxShadow: '0 4px 14px rgba(255, 255, 255, 0.4)',
                   transition: 'all 0.3s ease',
                   '&:hover': {
-                    bgcolor: '#fff7aa',
+                    bgcolor: '#f0f0f0',
                     transform: 'translateY(-2px)',
-                    boxShadow: '0 6px 20px rgba(255, 230, 109, 0.6)',
+                    boxShadow: '0 6px 20px rgba(255, 255, 255, 0.6)',
                   },
                 }}
               >
-                Sign Up Now
+                Join Med-Friend Now
               </Button>
               <Button 
                 variant="outlined" 
@@ -350,8 +326,8 @@ export default function LandingPage() {
                   transition: 'all 0.3s ease',
                   '&:hover': {
                     bgcolor: 'rgba(255,255,255,0.1)',
-                    borderColor: '#ffe66d',
-                    color: '#ffe66d',
+                    borderColor: '#ffffff',
+                    color: '#ffffff',
                   },
                 }}
               >
@@ -383,8 +359,8 @@ export default function LandingPage() {
           </Box>
         </Modal>
 
-        {healthBotOpen && (
-          <PopupChat user={user} onClose={handleCloseHealthBot} />
+        {medFriendOpen && (
+          <PopupChat user={user} onClose={handleCloseMedFriend} />
         )}
 
         <PopupChat user={user} />

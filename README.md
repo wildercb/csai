@@ -1,26 +1,17 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
-
-## Getting Started
+## Getting Started on Local Development 
 
 First, run the development server:
 
-```bash
+<pre style="background-color: black; color: white;">
+
+npm install
 npm run dev
 # or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
-
+yarn dev /pnpm dev /bun dev
+</pre>
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
-
-# MedServe: System Documentation
+# Med-friend: System Documentation
 
 ## Table of Contents
 1. [Introduction](#1-introduction)
@@ -39,7 +30,7 @@ This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-opti
 
 ## 1. Introduction
 
-MedServe is an advanced health assistant application designed to provide users with instant access to accurate, AI-powered health information. We combine the best publicly available health knowledge, with the best AI tools able to efficiently provide that knowledge as needed. The system combines modern web technologies with artificial intelligence to create an interactive and informative experience for users seeking health-related advice.
+Med-friend is an advanced health assistant application designed to provide users with instant access to accurate, AI-powered health information. We combine the best publicly available health knowledge, with the best AI tools able to efficiently provide that knowledge as needed. The system combines modern web technologies with artificial intelligence to create an interactive and informative experience for users seeking health-related advice.
 
 ### Key Features:
 - AI-powered chat interface for health-related queries
@@ -55,14 +46,37 @@ MedServe is an advanced health assistant application designed to provide users w
 
 ## 2. System Architecture
 
-MedServe AI follows a modern, serverless architecture leveraging cloud services for scalability and maintainability.
+Med-friend AI follows a modern, serverless architecture leveraging cloud services for scalability and maintainability.
 
-### High-Level Architecture Diagram:
-[User] <-> [Next.js Frontend] <-> [API Routes] <-> [LLM Provider's API]
-^
-|
-v
-[Firebase Auth] <-> [Firebase Firestore] <-> [Pinecone Vector DB]
+## High-Level Architecture Diagram
+
+```mermaid
+graph TD
+    User[User] -->|HTTPS| Frontend[Next.js Frontend]
+    subgraph Frontend
+        Landing[Landing Page]
+        Chat[Chat Interface]
+    end
+    Frontend -->|API Calls| Routes[API Routes]
+    subgraph Routes
+        ChatProcess[Chat Processing]
+        UserAuth[User Auth]
+        VectorSearch[Vector Search]
+    end
+    ChatProcess -->|NLP Requests| LLMAPI[LLM API]
+    UserAuth -->|Authenticate| FireAuth[Firebase Auth]
+    VectorSearch -->|Query| PineconeAPI[Pinecone API]
+    FireAuth --> Firestore[Firebase Firestore]
+    PineconeAPI --> Firestore
+    
+    classDef frontend fill:#d0e0ff,stroke:#333,stroke-width:2px;
+    classDef backend fill:#ffe0d0,stroke:#333,stroke-width:2px;
+    classDef external fill:#d0ffe0,stroke:#333,stroke-width:2px;
+    
+    class Frontend frontend;
+    class Routes backend;
+    class LLMAPI,FireAuth,PineconeAPI,Firestore external;
+```
 
 ### Components:
 1. **Next.js Frontend**: Serves the user interface and handles client-side logic.
@@ -77,11 +91,11 @@ v
 ### 3.1 Frontend Components
 
 #### LandingPage (`src/app/page.js`)
-The main entry point of the application, introducing users to MedServe AI.
+The main entry point of the application, introducing users to Med-friend AI.
 
 Key features:
 - Responsive design with Material-UI
-- Introduction to MedServe AI capabilities
+- Introduction to Med-friend AI capabilities
 - Options to try the HealthBot or enter the full chat interface
 
 #### ChatPage (`src/app/chat/page.js`)
@@ -136,7 +150,7 @@ The user interface is built using React components and styled with Material-UI, 
 The landing page (`src/app/page.js`) serves as the main entry point for users. It features:
 
 - A hero section with a call-to-action
-- Feature highlights of MedServe AI
+- Feature highlights of Med-friend AI
 - Options to try the HealthBot or access the full chat interface
 - Login/Signup buttons
 
@@ -184,7 +198,7 @@ The application uses a combination of Material-UI's built-in styling system and 
 
 ## 5. Backend Services
 
-The backend of MedServe AI is primarily serverless, utilizing Next.js API routes and cloud services.
+The backend of Med-friend AI is primarily serverless, utilizing Next.js API routes and cloud services.
 
 ### 5.1 API Routes
 
@@ -215,7 +229,7 @@ The Pinecone service is initialized and queried in the chat API route.
 
 ## 6. AI Integration
 
-MedServe AI leverages OpenAI's GPT models for generating intelligent responses to user queries.
+Med-friend AI leverages OpenAI's GPT models for generating intelligent responses to user queries.
 
 ### 6.1 OpenAI Integration
 
@@ -239,7 +253,7 @@ This process enhances the AI's ability to provide informed and contextually appr
 
 ## 7. Database Design
 
-MedServe AI uses two database systems: Firebase Firestore and Pinecone Vector Database.
+Med-friend AI uses two database systems: Firebase Firestore and Pinecone Vector Database.
 
 ### 7.1 Firebase Firestore
 
@@ -267,7 +281,7 @@ The Pinecone database is queried in the chat API route to retrieve context for A
 
 ## 8. Authentication and Security
 
-MedServe AI implements robust authentication and security measures to protect user data and ensure secure interactions.
+Med-friend AI implements robust authentication and security measures to protect user data and ensure secure interactions.
 
 ### 8.1 User Authentication
 
@@ -318,7 +332,7 @@ json
 Firebase Authentication is used, which provides RESTful endpoints for authentication operations. Refer to the [Firebase Authentication REST API documentation](https://firebase.google.com/docs/reference/rest/auth) for detailed information on these endpoints.
 
 ## 10. Deployment
-MedServe AI is designed to be deployed on cloud platforms that support Next.js applications.
+Med-friend AI is designed to be deployed on cloud platforms that support Next.js applications.
 
 ### 10.1 Deployment Steps
 1. Set up environment variables on the deployment platform
@@ -432,7 +446,9 @@ Potential areas for future development include:
     - Develop native mobile apps
     - Optimize performance for low-bandwidth connections
 
-By continuously improving and expanding the capabilities of MedServe AI, we aim to provide an increasingly valuable tool for users seeking health information and advice.
+By continuously improving and expanding the capabilities of Med-friend AI, we aim to provide an increasingly valuable tool for users seeking health information and advice.
+
+This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
 
 ## Learn More
 
