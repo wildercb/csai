@@ -1,8 +1,8 @@
-<pre style="background-color: black; color: white;">
 ## Getting Started
 
 First, run the development server:
 
+<pre style="background-color: black; color: white;">
 ```bash
 npm install
 npm run dev
