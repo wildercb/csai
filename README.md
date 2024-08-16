@@ -1,5 +1,3 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
-
 ## Getting Started
 
 First, run the development server:
@@ -448,6 +446,8 @@ Potential areas for future development include:
     - Optimize performance for low-bandwidth connections
 
 By continuously improving and expanding the capabilities of MedServe AI, we aim to provide an increasingly valuable tool for users seeking health information and advice.
+
+This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
 
 ## Learn More
 
