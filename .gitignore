@@ -38,3 +38,6 @@ utils
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+app_reader.ipynb
+app.json
